@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Registration Page</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('#form').onsubmit = () => {
+        
+        // Creating request and getting input values
+        const request = new XMLHttpRequest();
+        const username = document.querySelector('#username').value;
+        const email = document.querySelector('#email').value;
+        const first_name = document.querySelector('#first_name').value;
+        const last_name = document.querySelector('#last_name').value;
+        const password = document.querySelector('#password').value;
+        const password_confirm = document.querySelector('#password_confirm').value;
+
+
+        
+
+        // Defining method and submit url
+        request.open('POST', 'http://127.0.0.1:8000/api/users/register/');
+
+        // Defining what happens on load of request
+        request.onload = () => {
+          const status = request.status;
+          const response = JSON.parse(request.responseText);
+
+          if (status === 201) {
+            document.querySelector('#result').innerHTML = `${request.responseText}`;
+            window.location.pathname = 'C:/Users/SenseDevelopment/Desktop/Projects/Test%20Task/front/login.html';
+          } else {
+            document.querySelector('#result').innerHTML = `Error: ${status} - ${request.responseText}`;
+          }
+        }
+
+        // Filling form data
+        const data = new FormData();
+        data.append('username', username);
+        data.append('email', email);
+        data.append('first_name', first_name);
+        data.append('last_name', last_name);
+        data.append('password', password);
+        data.append('password_confirm', password_confirm);  
+
+
+
+        // Sending request and returning false to prevent default submit
+        request.send(data);
+        return false;
+      }
+  })
+  </script>
+
+  <style>
+    form {
+      width: 20vw;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <br/>
+    <form id="form" style="margin:0;">
+      <input type="text" id="username" autocomplete="off" placeholder="Login" class="form-control"><br/>
+      <input type="text" id="first_name" autocomplete="off" placeholder="First Name" class="form-control"><br/>
+      <input type="text" id="last_name" autocomplete="off" placeholder="Last Name" class="form-control"><br/>
+      <input type="email" id="email" autocomplete="off" placeholder="Email" class="form-control"><br/>
+      <input type="password" id="password" autocomplete="off" placeholder="Password" class="form-control"><br/>
+      <input type="password" id="password_confirm" autocomplete="off" placeholder="Password Confirm" class="form-control"><br/>
+      <input type="submit" value="Register  " class="form-control">
+    </form>
+    <h3 id="result"></h3>
+
+  </div>
+</body>
+</html>
