@@ -3,7 +3,6 @@ from .views import (
     SensorListAPIView,
     DeviceListAPIView,
     HubListAPIView,
-    HubsCollectedDataListAPIView,
     SensorCollectedDataListCreateAPIView,
     SensorCollectedDataAPIView
 )
@@ -20,5 +19,4 @@ urlpatterns = [
         name='hubs-collect-data'),
     path('devices/', DeviceListAPIView.as_view(), name='device-list'),
     path('hubs/', HubListAPIView.as_view(), name='hub-list'),
-    path('hubs/collected-data/', HubsCollectedDataListAPIView.as_view(), name='hubs-collected-data-list')
 ]

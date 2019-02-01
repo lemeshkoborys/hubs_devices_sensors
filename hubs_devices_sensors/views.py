@@ -41,8 +41,3 @@ class SensorCollectedDataListCreateAPIView(APIView):
 class SensorCollectedDataAPIView(generics.ListAPIView):
     queryset = SensorCollectedData.objects.all()
     serializer_class = serializers.SensorCollectedDataModelSerializer
-
-class HubsCollectedDataListAPIView(generics.ListAPIView):
-
-    queryset = Hub.objects.all()
-    serializer_class = serializers.HubCollectedDataModelsSerializer

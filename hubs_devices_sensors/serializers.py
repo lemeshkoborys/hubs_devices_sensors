@@ -5,11 +5,6 @@ from index_app.serializers import UserBaseSerializer
 
 class SensorCollectedDataModelSerializer(ModelSerializer):
 
-    def __init__(self, *args, **kwargs):
-        many = kwargs.pop('many', True)
-        super(SensorCollectedDataModelSerializer, self).__init__(many=many, *args, **kwargs)
-
-
     class Meta:
         model = SensorCollectedData
         fields = (
@@ -64,15 +59,3 @@ class HubModelSerializer(ModelSerializer):
             'owner'
         )
 
-
-class HubCollectedDataModelsSerializer(ModelSerializer):
-
-    devices = DeviceModelSerializer(many=True)
-
-    class Meta:
-        model= Hub
-        fields = (
-            'id',
-            'hub_title',
-            'devices'
-        )
