@@ -9,17 +9,17 @@ Classes:
     SensorCollectedDataAdminAPIView,
     SensorCollectedDataUserAPIView
 """
-from django.shortcuts import render
 from .models import Sensor, Device, Hub, SensorCollectedData
 import hubs_devices_sensors.serializers as serializers
-from rest_framework import generics, status
+from rest_framework import generics, status, exceptions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.forms.models import model_to_dict
+import django.core.exceptions as django_exceptions
 
 
-class SensorListCreateAPIView(APIView):
+class SensorListCreateAPIView(generics.ListCreateAPIView):
 
     """
     Class Based View for CREATE and LIST serialized Sensor objects
@@ -29,30 +29,42 @@ class SensorListCreateAPIView(APIView):
     """
 
     permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.SensorModelSerializer
 
-    def get(self, request, format=None):
-
-        sensors = Sensor.objects.filter(
-            sensor_device__device_hub__owner=request.user
+    def get_queryset(self):
+        user = self.request.user
+        return Sensor.objects.filter(
+            sensor_device__device_hub__owner=user
         )
 
-        serializer = serializers.SensorModelSerializer(
-            sensors,
-            many=True
-        )
-        return Response(serializer.data)
+    
+class SensorRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
-    def post(self, request, format=None):
-        serializer = serializers.SensorModelSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    """
+    Class Based View SensorRetrieveUpdateDestroyAPIView
+    Allows to Retrieve Update and Destroy single Sensor object
+    @param permission_classes - permission classes for this Class Based View
+
+    ALLOWED METHODS - GET, PUT, PATCH, DELETE
+    """
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.SensorModelSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        sensor = Sensor.objects.filter(pk=self.kwargs['pk'])
+
+        try:
+            if sensor.first().sensor_device.device_hub.owner == user:
+                return sensor
+            else:
+                raise exceptions.PermissionDenied('You are not allowed to perform this action')
+        except AttributeError:
+            raise exceptions.NotFound('Requested Sensor was not found at our own')
 
 
-
-class DeviceListCreateAPIView(APIView):
+class DeviceListCreateAPIView(generics.ListCreateAPIView):
 
     """
     Class Based View for CREATE and LIST serialized Device objects
@@ -62,22 +74,39 @@ class DeviceListCreateAPIView(APIView):
     """
 
     permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.DeviceModelSerializer
 
-    def get(self, request, format=None):
-        devices = Device.objects.filter(device_hub__hub__owner=request.user)
-        serializer = serializers.DeviceModelSerializer(devices, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = serializers.DeviceModelSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        user = self.request.user
+        return Device.objects.filter(device_hub__owner=user)
 
 
-class HubListAPIView(APIView):
+class DeviceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    Class Based View DeviceRetrieveUpdateDestroy
+    Allows to Retrieve Update and Destroy single Device object
+    @param permission_classes - permission classes for this Class Based View
+
+    ALLOWED METHODS - GET, PUT, PATCH, DELETE
+    """
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.DeviceModelSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        device = Device.objects.filter(pk=self.kwargs['pk'])
+        try:
+            if device.first().device_hub.owner == user:
+                return device
+            else:
+                raise exceptions.PermissionDenied('You are not allowed to perform this action')
+        except AttributeError:
+            raise exceptions.NotFound('Requested Device was not found at our own')
+
+
+class HubListAPIView(generics.ListAPIView):
 
     """
     Class Based View for LIST serialized Hub objects
@@ -87,11 +116,11 @@ class HubListAPIView(APIView):
     """
 
     permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.HubModelSerializer
 
-    def get(self, request, format=None):
-        hubs = Hub.objects.filter(owner=request.user)
-        serializer = serializers.HubModelSerializer(hubs, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        user = self.request.user
+        return Hub.objects.filter(owner=user)
 
 
 class HubCreateAPIView(generics.CreateAPIView):
@@ -111,6 +140,33 @@ class HubCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class HubRetrieveUpateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+
+    """
+    Class Based View HubRetrieveUpateDestroyAPIView
+    Allows to Retrieve Update and Destroy single Hub object
+    @param permission_classes - permission classes for this Class Based View
+
+    ALLOWED METHODS - GET, PUT, PATCH, DELETE
+    """
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.HubModelSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        hub = Hub.objects.filter(pk=self.kwargs['pk'])
+
+        try:
+            if hub.first().owner == user:
+                return hub
+            else:
+                raise exceptions.PermissionDenied('You are not allowed to perform this action')
+        except AttributeError:
+            raise exceptions.NotFound('Requested Hub was not found at our own')
 
 
 class SensorCollectedDataListCreateAPIView(APIView):
@@ -143,7 +199,7 @@ class SensorCollectedDataAdminAPIView(generics.ListAPIView):
     serializer_class = serializers.SensorCollectedDataModelSerializer
 
 
-class SensorCollectedDataUserAPIView(APIView):
+class SensorAllCollectedDataUserAPIView(generics.ListAPIView):
 
     """
     Class Based View for LIST serialized SensorCollectedData objects
@@ -153,15 +209,36 @@ class SensorCollectedDataUserAPIView(APIView):
     """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.SensorCollectedDataModelSerializer
 
-    def get(self, request, format=None):
-
-        sensors_collected_data = SensorCollectedData.objects.filter(
-            sensor__sensor_device__device_hub__owner=request.user
+    def get_queryset(self):
+        user = self.request.user
+        return SensorCollectedData.objects.filter(
+            sensor__sensor_device__device_hub__owner=user
         )
 
-        serializer = serializers.SensorCollectedDataModelSerializer(
-            list(sensors_collected_data),
-            many=True
-        )
-        return Response(serializer.data)
+
+class OneSensorCollectedDataUserAPIView(generics.ListAPIView):
+
+    """
+    Class Based View for RETRIEVE serialized SensorCollectedData objects for  one related Sensor by current user
+    Allowed only for Authenticated Users
+    ALLOWED_METHODS: GET
+    """
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.SensorCollectedDataModelSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        try:
+            current_sensor = Sensor.objects.get(pk=self.kwargs['pk'])
+            if current_sensor.sensor_device.device_hub.owner == user:
+                return SensorCollectedData.objects.filter(
+                    sensor=current_sensor,
+                    sensor__sensor_device__device_hub__owner=user
+                )
+            else:
+                raise exceptions.PermissionDenied('You are not allowed to perform this action')
+        except Sensor.DoesNotExist:
+            raise exceptions.NotFound('Requested Sensor Data was not found at our own')

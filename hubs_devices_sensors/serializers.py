@@ -40,7 +40,8 @@ class SensorModelSerializer(ModelSerializer):
         'id',
         'sensor_title',
         'sensor_data_type',
-        'sensor_device'
+        'sensor_device',
+        'sensor_serial_number'
     """
 
     class Meta:
@@ -49,7 +50,8 @@ class SensorModelSerializer(ModelSerializer):
             'id',
             'sensor_title',
             'sensor_data_type',
-            'sensor_device'
+            'sensor_device',
+            'sensor_serial_number'
         )
 
 
