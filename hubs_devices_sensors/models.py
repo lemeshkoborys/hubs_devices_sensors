@@ -31,7 +31,8 @@ class SensorCollectedData(models.Model):
     sensor = models.ForeignKey(
         'hubs_devices_sensors.Sensor',
         on_delete=models.CASCADE,
-        related_name='sensor_collected_data'
+        related_name='sensor_collected_data',
+        to_field='sensor_serial_number'
     )
 
     sensor_data_value = models.FloatField(

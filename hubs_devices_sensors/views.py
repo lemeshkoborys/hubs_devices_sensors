@@ -101,7 +101,9 @@ class DeviceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             if device.first().device_hub.owner == user:
                 return device
             else:
-                raise exceptions.PermissionDenied('You are not allowed to perform this action')
+                raise exceptions.PermissionDenied(
+                    'You are not allowed to perform this action'
+                )
         except AttributeError:
             raise exceptions.NotFound('Requested Device was not found at our own')
 

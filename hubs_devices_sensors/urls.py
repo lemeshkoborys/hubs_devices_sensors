@@ -20,12 +20,22 @@ from .views import (
 """
 Available API paths:
     sensors/ - GET, POST
+    sensors/<int:pk>/ - GET
+    sensors/<int:pk>/update/ - PUT, PATCH
+    sensors/<int:pk>/delete/ - DELETE 
     sensors/collect-data/ - POST
     sensors/collected-data/admin/ - GET
     sensors/collected-data/ - GET
+    sensors/<int:pk>/collected-data/ - GET
     devices/ - GET, POST
+    devices/<int:pk>/ - GET
+    devices/<int:pk>/update - PUT, PATCH
+    devices/<int:pk>/delete - DELETE
     hubs/ - GET
     hubs/create/ - POST
+    hubs/<int:pk>/ - GET
+    hubs/<int:pk>/update/ - PUT, PATCH
+    hubs/<int:pk>/delete/ - DELETE
 """
 
 urlpatterns = []
@@ -75,6 +85,17 @@ SENSORS_URLS = [
         SensorRetrieveUpdateDestroyAPIView.as_view(),
         name='sensor-retrieve'
     ),
+    path(
+        'sensors/<int:pk>/update/',
+        SensorRetrieveUpdateDestroyAPIView.as_view(),
+        name='sensor-update'
+    ),
+    path(
+        'sensors/<int:pk>/delete/',
+        SensorRetrieveUpdateDestroyAPIView.as_view(),
+        name='sensor-delete'
+    ),
+    
 
 ]
 
