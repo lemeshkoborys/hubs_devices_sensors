@@ -1,3 +1,14 @@
+"""
+views.py
+Classes:
+    SensorListCreateAPIView,
+    DeviceListCreateAPIView,
+    HubListAPIView,
+    HubCreateAPIView,
+    SensorCollectedDataListCreateAPIView,
+    SensorCollectedDataAdminAPIView,
+    SensorCollectedDataUserAPIView
+"""
 from django.shortcuts import render
 from .models import Sensor, Device, Hub, SensorCollectedData
 import hubs_devices_sensors.serializers as serializers
@@ -9,6 +20,13 @@ from django.forms.models import model_to_dict
 
 
 class SensorListCreateAPIView(APIView):
+
+    """
+    Class Based View for CREATE and LIST serialized Sensor objects
+    @param permission_classes - permission classes for this Class Based View
+    
+    ALLOWED_METHODS: GET, POST
+    """
 
     permission_classes = (IsAuthenticated, )
 
@@ -36,6 +54,13 @@ class SensorListCreateAPIView(APIView):
 
 class DeviceListCreateAPIView(APIView):
 
+    """
+    Class Based View for CREATE and LIST serialized Device objects
+    @param permission_classes - permission classes for this Class Based View
+    
+    ALLOWED_METHODS: GET, POST
+    """
+
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, format=None):
@@ -54,6 +79,13 @@ class DeviceListCreateAPIView(APIView):
 
 class HubListAPIView(APIView):
 
+    """
+    Class Based View for LIST serialized Hub objects
+    @param permission_classes - permission classes for this Class Based View
+    
+    ALLOWED_METHODS: GET
+    """
+
     permission_classes = (IsAuthenticated, )
 
     def get(self, request, format=None):
@@ -63,6 +95,14 @@ class HubListAPIView(APIView):
 
 
 class HubCreateAPIView(generics.CreateAPIView):
+
+    """
+    Class Based View for CREATE serialized Hub objects
+    @param permission_classes - permission classes for this Class Based View
+    
+    @method perform_create - automatically adds owner to Hub object on create
+    ALLOWED_METHODS: POST
+    """
 
     permission_classes = (IsAuthenticated, )
 
@@ -75,6 +115,11 @@ class HubCreateAPIView(generics.CreateAPIView):
 
 class SensorCollectedDataListCreateAPIView(APIView):
 
+    """
+    Class Based View for LIST-CREATE serialized SensorCollectedData objects
+    ALLOWED_METHODS: POST
+    """
+
     def post(self, request, format=None):
         serializer = serializers.SensorCollectedDataModelSerializer(data=request.data, many=True)
         if serializer.is_valid():
@@ -86,6 +131,12 @@ class SensorCollectedDataListCreateAPIView(APIView):
 
 class SensorCollectedDataAdminAPIView(generics.ListAPIView):
 
+    """
+    Class Based View for LIST all serialized SensorCollectedData objects
+    Allowed only for Admin Users
+    ALLOWED_METHODS: GET
+    """
+
     permission_classes = (IsAuthenticated, IsAdminUser)
 
     queryset = SensorCollectedData.objects.all()
@@ -93,6 +144,13 @@ class SensorCollectedDataAdminAPIView(generics.ListAPIView):
 
 
 class SensorCollectedDataUserAPIView(APIView):
+
+    """
+    Class Based View for LIST serialized SensorCollectedData objects
+    related to current user
+    Allowed only for Authenticated Users
+    ALLOWED_METHODS: GET
+    """
 
     permission_classes = (IsAuthenticated,)
 

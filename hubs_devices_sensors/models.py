@@ -1,3 +1,7 @@
+"""
+models.py
+Clases: Hub, Device, Sensor, SensorCollectedData
+"""
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -5,6 +9,17 @@ import hubs_devices_sensors.sensor_consts as sensor_consts
 
 
 class SensorCollectedData(models.Model):
+
+    """
+    Class SensorCollectedData - stores all collected data from sensors at current time
+    @param date_time_collected - models.DateTimeField stores date and time data collected
+    @param sensor -  models.ForeignKey('hubs_devices_sensors.Sensor') stores the foreign key
+    to sensor which data is collected
+    @param sensor_data_value - models.FloatField stores sensor value at current time
+
+    @method clean() - performs validation of the sensor_data_value 
+    @method save() - saves object after parforming clean() method
+    """
 
     class Meta:
         db_table = 'sensor_collected_data'
@@ -57,6 +72,17 @@ class SensorCollectedData(models.Model):
 
 class Sensor(models.Model):
 
+    """
+    Class Sensor - stores data/information about current sensor
+    @param SENSOR_DATA_TYPES - Enum that contains three types of sensor data type ('pH', 'CO2', 'Temperature')
+    @param sensor_title - models.CharField(max_length=120) title/name of the current sensor
+    @param sensor_device - sensor_device = models.ForeignKey('hubs_devices_sensors.Device') stores the foreign key
+    to the related Device object
+    @param sensor_data_type - models.CharField(max_length=30) stores Sensor data type (takes it from SENSOR_DATA_TYPE Enum)
+
+    @method __str__(self) - string method. Returns Sensor title
+    """
+
     SENSOR_DATA_TYPES = (
         (sensor_consts.PH_SENSOR, 'pH'),
         (sensor_consts.CO2_SENSOR, 'CO2'),
@@ -84,16 +110,23 @@ class Sensor(models.Model):
         choices=SENSOR_DATA_TYPES
     )
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super(Sensor, self).save(*args, **kwargs)
-
     def __str__(self):
         return 'Sensor: ' + self.sensor_title + ' of Device: ' + str(self.sensor_device.device_title)
 
 
 
 class Device(models.Model):
+
+    """
+    Class Device - Stores the data/information about Device
+    @param device_title - models.CharField(max_length=120) stores device title/name
+    @papram device hub - models.ForeignKey('hubs_devices_sensors.Hub') stores the foreign key to the related 
+    Hub object
+    @param device_serial_number - device_serial_number = models.CharField(max_length=16, unique=True) 
+    unique field that stores Device serial number
+
+    @method __str__(self) - string method. Returns Device title
+    """
 
     class Meta:
         db_table = 'devices'
@@ -114,6 +147,15 @@ class Device(models.Model):
 
 
 class Hub(models.Model):
+
+    """
+    Class Device - Stores the data/information about Device
+    @param hub_title - models.CharField(max_length=120) stores Hub title/name
+    @param owner - models.ForeignKey(User) stores the foreign key to the related User object
+    @param hub_serial_number - models.CharField(max_length=16, unique=True) unique field that stores Hub serial number
+
+    @method __str__(self) - string method. Returns Hub title
+    """
 
     class Meta:
         db_table = 'hubs'
