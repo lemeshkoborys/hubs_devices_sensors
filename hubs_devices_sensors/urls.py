@@ -1,22 +1,30 @@
 from django.urls import path
 from .views import (
-    SensorListAPIView,
-    DeviceListAPIView,
+    SensorListCreateAPIView,
+    DeviceListCreateAPIView,
     HubListAPIView,
+    HubCreateAPIView,
     SensorCollectedDataListCreateAPIView,
-    SensorCollectedDataAPIView
+    SensorCollectedDataAdminAPIView,
+    SensorCollectedDataUserAPIView
 )
 
 urlpatterns = [
-    path('sensors/', SensorListAPIView.as_view(), name='sensor-list'),
+    path('sensors/', SensorListCreateAPIView.as_view(), name='sensor-list-create'),
     path(
         'sensors/collect-data/',
-        SensorCollectedDataListCreateAPIView.as_view(), 
-        name='sensors-collected-data-list'),
+        SensorCollectedDataListCreateAPIView.as_view(),
+        name='sensors-collect-data'),
+    path(
+        'sensors/collected-data/admin/',
+        SensorCollectedDataAdminAPIView.as_view(),
+        name='sensors-collect-data-admin'),
     path(
         'sensors/collected-data/',
-        SensorCollectedDataAPIView.as_view(),
-        name='hubs-collect-data'),
-    path('devices/', DeviceListAPIView.as_view(), name='device-list'),
+        SensorCollectedDataUserAPIView.as_view(),
+        name='sensors-collect-data'
+    ),
+    path('devices/', DeviceListCreateAPIView.as_view(), name='device-list'),
     path('hubs/', HubListAPIView.as_view(), name='hub-list'),
+    path('hubs/create/', HubCreateAPIView.as_view(), name='hub-create'),        
 ]

@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, CharField, ListSerializer
+from rest_framework.serializers import ModelSerializer
 from .models import Sensor, Device, Hub, SensorCollectedData
 from index_app.serializers import UserBaseSerializer
 
@@ -17,22 +17,17 @@ class SensorCollectedDataModelSerializer(ModelSerializer):
 
 class SensorModelSerializer(ModelSerializer):
 
-    sensor_collected_data = SensorCollectedDataModelSerializer(many=True)
-
     class Meta:
         model = Sensor
         fields = (
             'id',
             'sensor_title',
             'sensor_data_type',
-            'sensor_device',
-            'sensor_collected_data'
+            'sensor_device'
         )
 
 
 class DeviceModelSerializer(ModelSerializer):
-
-    sensors = SensorModelSerializer(many=True)
 
     class Meta:
         model = Device
@@ -40,15 +35,13 @@ class DeviceModelSerializer(ModelSerializer):
             'id',
             'device_title',
             'device_serial_number',
-            'device_hub',
-            'sensors'
+            'device_hub'
         )
-        # depth = 2
 
 
 class HubModelSerializer(ModelSerializer):
 
-    owner = UserBaseSerializer()
+    owner = UserBaseSerializer(required=False)
 
     class Meta:
         model = Hub
@@ -58,4 +51,3 @@ class HubModelSerializer(ModelSerializer):
             'hub_serial_number',
             'owner'
         )
-
