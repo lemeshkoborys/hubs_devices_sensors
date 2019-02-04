@@ -79,6 +79,7 @@ class Sensor(models.Model):
     @param sensor_device - sensor_device = models.ForeignKey('hubs_devices_sensors.Device') stores the foreign key
     to the related Device object
     @param sensor_data_type - models.CharField(max_length=30) stores Sensor data type (takes it from SENSOR_DATA_TYPE Enum)
+    @param sensor_serial_number - models.CharField(max_length=16, unique=True) unique field that stores Sensor serial number
 
     @method __str__(self) - string method. Returns Sensor title
     """
@@ -97,6 +98,8 @@ class Sensor(models.Model):
         )
 
     sensor_title = models.CharField(max_length=120)
+
+    sensor_serial_number = models.CharField(max_length=16, unique=True)
 
     sensor_device = models.ForeignKey(
         'hubs_devices_sensors.Device',
@@ -122,8 +125,7 @@ class Device(models.Model):
     @param device_title - models.CharField(max_length=120) stores device title/name
     @papram device hub - models.ForeignKey('hubs_devices_sensors.Hub') stores the foreign key to the related 
     Hub object
-    @param device_serial_number - device_serial_number = models.CharField(max_length=16, unique=True) 
-    unique field that stores Device serial number
+    @param device_serial_number - models.CharField(max_length=16, unique=True) unique field that stores Device serial number
 
     @method __str__(self) - string method. Returns Device title
     """
@@ -167,4 +169,4 @@ class Hub(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.hub_title    
+        return self.hub_title
