@@ -130,3 +130,22 @@ __Allowed methods: GET, POST, PUT, PATCH, DELETE__
 ### Devices
 
 1. #### GET
+2. #### POST   
+    _/api/tools/devices/create/_
+    ##### Request data example:
+    ```JSON
+    {
+        "device_title": "My Device #1",
+        "device_serial_number": "AS12SDSD2635123",
+        "device_hub": "XXZZVVDD2233"
+    }
+    ```
+    ##### Response data example:
+    ```JSON
+    {
+        "id": 1,
+        "device_title": "My Device #1",
+        "device_serial_number": "AS12SDSD2635123",
+        "device_hub": "XXZZVVDD2233"
+    }
+    ```

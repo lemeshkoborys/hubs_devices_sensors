@@ -108,6 +108,17 @@ class DeviceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
             raise exceptions.NotFound('Requested Device was not found at our own')
 
 
+class DeviceListSensorsAPIView(generics.ListAPIView):
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.SensorModelSerializer
+
+    def get_queryset(self):
+        return Sensor.objects.filter(
+            sensor_device=Device.objects.get(pk=self.kwargs['pk'])
+        )
+
+
 class HubListAPIView(generics.ListAPIView):
 
     """
@@ -169,6 +180,17 @@ class HubRetrieveUpateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
                 raise exceptions.PermissionDenied('You are not allowed to perform this action')
         except AttributeError:
             raise exceptions.NotFound('Requested Hub was not found at our own')
+
+
+class HubDevicesListAPIView(generics.ListAPIView):
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.HubModelSerializer
+
+    def get_queryset(self):
+        return Device.objects.filter(
+            device_hub=Hub.objects.get(pk=self.kwargs['pk'])
+        )
 
 
 class SensorCollectedDataListCreateAPIView(APIView):

@@ -8,9 +8,11 @@ from .views import (
     SensorRetrieveUpdateDestroyAPIView,
     DeviceListCreateAPIView,
     DeviceRetrieveUpdateDestroy,
+    DeviceListSensorsAPIView,
     HubListAPIView,
     HubCreateAPIView,
     HubRetrieveUpateDestroyAPIView,
+    HubDevicesListAPIView,
     SensorCollectedDataListCreateAPIView,
     SensorCollectedDataAdminAPIView,
     SensorAllCollectedDataUserAPIView,
@@ -23,7 +25,7 @@ Available API paths:
     sensors/create/ - POST
     sensors/<int:pk>/ - GET
     sensors/<int:pk>/update/ - PUT, PATCH
-    sensors/<int:pk>/delete/ - DELETE 
+    sensors/<int:pk>/delete/ - DELETE
     sensors/collect-data/ - POST
     sensors/collected-data/admin/ - GET
     sensors/collected-data/ - GET
@@ -33,11 +35,13 @@ Available API paths:
     devices/<int:pk>/ - GET
     devices/<int:pk>/update - PUT, PATCH
     devices/<int:pk>/delete - DELETE
+    devices/<int:pk>/sensors/ - GET 
     hubs/ - GET
     hubs/create/ - POST
     hubs/<int:pk>/ - GET
     hubs/<int:pk>/update/ - PUT, PATCH
     hubs/<int:pk>/delete/ - DELETE
+    hubs/<int:pk>/devices/ - GET
 """
 
 urlpatterns = []
@@ -48,7 +52,7 @@ HUBS_URLS = [
     path(
         'hubs/<int:pk>/',
         HubRetrieveUpateDestroyAPIView.as_view(),
-        name='hub-retrieve'
+        name='hub-detail'
     ),
     path(
         'hubs/<int:pk>/update/',
@@ -59,6 +63,11 @@ HUBS_URLS = [
         'hubs/<int:pk>/delete/',
         HubRetrieveUpateDestroyAPIView.as_view(),
         name='hub-delete'
+    ),
+    path(
+        'hubs/<int:pk>/devices/',
+        HubDevicesListAPIView.as_view(),
+        name='hub-devices'
     )
 ]
 
@@ -86,7 +95,7 @@ SENSORS_URLS = [
     path(
         'sensors/<int:pk>/',
         SensorRetrieveUpdateDestroyAPIView.as_view(),
-        name='sensor-retrieve'
+        name='sensor-detail'
     ),
     path(
         'sensors/<int:pk>/update/',
@@ -108,12 +117,17 @@ DEVICES_URLS = [
     path(
         'devices/<int:pk>/',
         DeviceRetrieveUpdateDestroy.as_view(),
-        name='device-retrieve'
+        name='device-detail'
     ),
     path(
         'devices/<int:pk>/update/',
         DeviceRetrieveUpdateDestroy.as_view(),
         name='device-update'
+    ),
+    path(
+        'devices/<int:pk>/sensors/',
+        DeviceListSensorsAPIView.as_view(),
+        name='device-sensors'
     ),
 ]
 urlpatterns += DEVICES_URLS + HUBS_URLS + SENSORS_URLS
