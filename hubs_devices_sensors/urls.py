@@ -16,33 +16,34 @@ from .views import (
     SensorCollectedDataListCreateAPIView,
     SensorCollectedDataAdminAPIView,
     SensorAllCollectedDataUserAPIView,
-    OneSensorCollectedDataUserAPIView
+    OneSensorCollectedDataUserAPIView,
+    SensorCollectedDataTimeRangeAPIView
 )
 
-"""
-Available API paths:
-    sensors/ - GET
-    sensors/create/ - POST
-    sensors/<int:pk>/ - GET
-    sensors/<int:pk>/update/ - PUT, PATCH
-    sensors/<int:pk>/delete/ - DELETE
-    sensors/collect-data/ - POST
-    sensors/collected-data/admin/ - GET
-    sensors/collected-data/ - GET
-    sensors/<int:pk>/collected-data/ - GET
-    devices/ - GET
-    devices/create/ - POST
-    devices/<int:pk>/ - GET
-    devices/<int:pk>/update - PUT, PATCH
-    devices/<int:pk>/delete - DELETE
-    devices/<int:pk>/sensors/ - GET 
-    hubs/ - GET
-    hubs/create/ - POST
-    hubs/<int:pk>/ - GET
-    hubs/<int:pk>/update/ - PUT, PATCH
-    hubs/<int:pk>/delete/ - DELETE
-    hubs/<int:pk>/devices/ - GET
-"""
+
+# Available API paths:
+#     sensors/ - GET
+#     sensors/create/ - POST
+#     sensors/<int:pk>/ - GET
+#     sensors/<int:pk>/update/ - PUT, PATCH
+#     sensors/<int:pk>/delete/ - DELETE
+#     sensors/collect-data/ - POST
+#     sensors/collected-data/admin/ - GET
+#     sensors/collected-data/ - GET
+#     sensors/<int:pk>/collected-data/ - GET
+#     devices/ - GET
+#     devices/create/ - POST
+#     devices/<int:pk>/ - GET
+#     devices/<int:pk>/update - PUT, PATCH
+#     devices/<int:pk>/delete - DELETE
+#     devices/<int:pk>/sensors/ - GET
+#     hubs/ - GET
+#     hubs/create/ - POST
+#     hubs/<int:pk>/ - GET
+#     hubs/<int:pk>/update/ - PUT, PATCH
+#     hubs/<int:pk>/delete/ - DELETE
+#     hubs/<int:pk>/devices/ - GET
+
 
 urlpatterns = []
 
@@ -107,7 +108,6 @@ SENSORS_URLS = [
         SensorRetrieveUpdateDestroyAPIView.as_view(),
         name='sensor-delete'
     ),
-    
 
 ]
 
@@ -129,5 +129,11 @@ DEVICES_URLS = [
         DeviceListSensorsAPIView.as_view(),
         name='device-sensors'
     ),
+    path(
+        # e.g ?start_datetime=2018-01-02T21:25:33Z&end_datetime=2018-01-02T22:45:33Z
+        'devices/<int:pk>/sensors-collected-data/',
+        SensorCollectedDataTimeRangeAPIView.as_view(),
+        name='sensor-data-time-range'
+    )
 ]
 urlpatterns += DEVICES_URLS + HUBS_URLS + SENSORS_URLS

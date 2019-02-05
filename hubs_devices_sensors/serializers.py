@@ -6,9 +6,13 @@ Classes:
     DeviceModelSerializer,
     HubModelSerializer
 """
-from rest_framework.serializers import ModelSerializer, HyperlinkedModelSerializer, HyperlinkedIdentityField
-from .models import Sensor, Device, Hub, SensorCollectedData
+from rest_framework.serializers import (
+    ModelSerializer,
+    HyperlinkedModelSerializer,
+    HyperlinkedIdentityField
+)
 from index_app.serializers import UserBaseSerializer
+from .models import Sensor, Device, Hub, SensorCollectedData
 
 
 class SensorCollectedDataModelSerializer(ModelSerializer):
@@ -25,7 +29,7 @@ class SensorCollectedDataModelSerializer(ModelSerializer):
     class Meta:
         model = SensorCollectedData
         fields = (
-            'id', 
+            'id',
             'sensor',
             'date_time_collected',
             'sensor_data_value',
@@ -33,8 +37,6 @@ class SensorCollectedDataModelSerializer(ModelSerializer):
 
 
 class SensorModelSerializer(HyperlinkedModelSerializer):
-
-    sensor_collected_data_url = HyperlinkedIdentityField(view_name='sensor-collected-data')
 
     """
     Class SensorModelSerializer - serializer for Sensor model
@@ -45,6 +47,8 @@ class SensorModelSerializer(HyperlinkedModelSerializer):
         'sensor_device',
         'sensor_serial_number',
     """
+
+    sensor_collected_data_url = HyperlinkedIdentityField(view_name='sensor-collected-data')
 
     class Meta:
         model = Sensor
@@ -61,8 +65,6 @@ class SensorModelSerializer(HyperlinkedModelSerializer):
 
 class DeviceModelSerializer(HyperlinkedModelSerializer):
 
-    device_sensors_url = HyperlinkedIdentityField(view_name='device-sensors')
-
     """
     Class DeviceModelSerializer - serializer for Device model
     Fields:
@@ -71,6 +73,8 @@ class DeviceModelSerializer(HyperlinkedModelSerializer):
         'device_serial_number',
         'device_hub'
     """
+
+    device_sensors_url = HyperlinkedIdentityField(view_name='device-sensors')
 
     class Meta:
         model = Device
@@ -86,8 +90,6 @@ class DeviceModelSerializer(HyperlinkedModelSerializer):
 
 class HubModelSerializer(HyperlinkedModelSerializer):
 
-    devices_url = HyperlinkedIdentityField(view_name='hub-devices')
-
     """
     Class HubModelSerializer - serializer for Hub model
     @param owner - Related object field of the UserBaseSerializer
@@ -98,6 +100,8 @@ class HubModelSerializer(HyperlinkedModelSerializer):
         'hub_serial_number',
         'owner'
     """
+
+    devices_url = HyperlinkedIdentityField(view_name='hub-devices')
 
     owner = UserBaseSerializer(required=False)
 
@@ -111,3 +115,5 @@ class HubModelSerializer(HyperlinkedModelSerializer):
             'owner',
             'devices_url'
         )
+
+# TODO Serilize timedelta

@@ -9,14 +9,12 @@ Classes:
     SensorCollectedDataAdminAPIView,
     SensorCollectedDataUserAPIView
 """
-from .models import Sensor, Device, Hub, SensorCollectedData
-import hubs_devices_sensors.serializers as serializers
 from rest_framework import generics, status, exceptions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from django.forms.models import model_to_dict
-import django.core.exceptions as django_exceptions
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+import hubs_devices_sensors.serializers as serializers
+from .models import Sensor, Device, Hub, SensorCollectedData
 
 
 class SensorListCreateAPIView(generics.ListCreateAPIView):
@@ -24,7 +22,7 @@ class SensorListCreateAPIView(generics.ListCreateAPIView):
     """
     Class Based View for CREATE and LIST serialized Sensor objects
     @param permission_classes - permission classes for this Class Based View
-    
+
     ALLOWED_METHODS: GET, POST
     """
 
@@ -37,7 +35,7 @@ class SensorListCreateAPIView(generics.ListCreateAPIView):
             sensor_device__device_hub__owner=user
         )
 
-    
+
 class SensorRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     """
@@ -69,7 +67,7 @@ class DeviceListCreateAPIView(generics.ListCreateAPIView):
     """
     Class Based View for CREATE and LIST serialized Device objects
     @param permission_classes - permission classes for this Class Based View
-    
+
     ALLOWED_METHODS: GET, POST
     """
 
@@ -110,6 +108,8 @@ class DeviceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 class DeviceListSensorsAPIView(generics.ListAPIView):
 
+    # TODO Comments
+
     permission_classes = (IsAuthenticated, )
     serializer_class = serializers.SensorModelSerializer
 
@@ -124,7 +124,7 @@ class HubListAPIView(generics.ListAPIView):
     """
     Class Based View for LIST serialized Hub objects
     @param permission_classes - permission classes for this Class Based View
-    
+
     ALLOWED_METHODS: GET
     """
 
@@ -141,7 +141,7 @@ class HubCreateAPIView(generics.CreateAPIView):
     """
     Class Based View for CREATE serialized Hub objects
     @param permission_classes - permission classes for this Class Based View
-    
+
     @method perform_create - automatically adds owner to Hub object on create
     ALLOWED_METHODS: POST
     """
@@ -184,6 +184,8 @@ class HubRetrieveUpateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class HubDevicesListAPIView(generics.ListAPIView):
 
+    # TODO Comments
+
     permission_classes = (IsAuthenticated, )
     serializer_class = serializers.HubModelSerializer
 
@@ -200,7 +202,12 @@ class SensorCollectedDataListCreateAPIView(APIView):
     ALLOWED_METHODS: POST
     """
 
+    permission_classes = (AllowAny, )
+
     def post(self, request, format=None):
+
+        # TODO method docstring
+
         serializer = serializers.SensorCollectedDataModelSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save()
@@ -245,7 +252,8 @@ class SensorAllCollectedDataUserAPIView(generics.ListAPIView):
 class OneSensorCollectedDataUserAPIView(generics.ListAPIView):
 
     """
-    Class Based View for RETRIEVE serialized SensorCollectedData objects for  one related Sensor by current user
+    Class Based View for RETRIEVE serialized SensorCollectedData
+    objects for  one related Sensor by current user
     Allowed only for Authenticated Users
     ALLOWED_METHODS: GET
     """
@@ -266,3 +274,21 @@ class OneSensorCollectedDataUserAPIView(generics.ListAPIView):
                 raise exceptions.PermissionDenied('You are not allowed to perform this action')
         except Sensor.DoesNotExist:
             raise exceptions.NotFound('Requested Sensor Data was not found at our own')
+
+
+class SensorCollectedDataTimeRangeAPIView(generics.ListAPIView):
+
+    permission_classes = (IsAuthenticated, )
+    serializer_class = serializers.SensorCollectedDataModelSerializer
+
+    def get_queryset(self):
+        start_datetime = self.request.query_params.get('start_datetime', None)
+        end_datetime = self.request.query_params.get('end_datetime', None)
+        user = self.request.user
+        device = Device.objects.get(pk=self.kwargs['pk'])
+
+        return SensorCollectedData.objects.filter(
+            sensor__sensor_device__device_hub__owner=user,
+            sensor__sensor_device=device,
+            date_time_collected__range=(start_datetime, end_datetime)
+        )
