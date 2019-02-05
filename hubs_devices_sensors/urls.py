@@ -19,7 +19,8 @@ from .views import (
 
 """
 Available API paths:
-    sensors/ - GET, POST
+    sensors/ - GET
+    sensors/create/ - POST
     sensors/<int:pk>/ - GET
     sensors/<int:pk>/update/ - PUT, PATCH
     sensors/<int:pk>/delete/ - DELETE 
@@ -27,7 +28,8 @@ Available API paths:
     sensors/collected-data/admin/ - GET
     sensors/collected-data/ - GET
     sensors/<int:pk>/collected-data/ - GET
-    devices/ - GET, POST
+    devices/ - GET
+    devices/create/ - POST
     devices/<int:pk>/ - GET
     devices/<int:pk>/update - PUT, PATCH
     devices/<int:pk>/delete - DELETE
@@ -61,7 +63,8 @@ HUBS_URLS = [
 ]
 
 SENSORS_URLS = [
-    path('sensors/', SensorListCreateAPIView.as_view(), name='sensor-list-create'),
+    path('sensors/', SensorListCreateAPIView.as_view(), name='sensor-list'),
+    path('sensors/create/', SensorListCreateAPIView.as_view(), name='sensor-create'),
     path(
         'sensors/collect-data/',
         SensorCollectedDataListCreateAPIView.as_view(),
@@ -101,6 +104,7 @@ SENSORS_URLS = [
 
 DEVICES_URLS = [
     path('devices/', DeviceListCreateAPIView.as_view(), name='device-list'),
+    path('devices/create/', DeviceListCreateAPIView.as_view(), name='device-create'),
     path(
         'devices/<int:pk>/',
         DeviceRetrieveUpdateDestroy.as_view(),
