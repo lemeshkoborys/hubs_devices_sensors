@@ -84,7 +84,8 @@ class DeviceModelSerializer(HyperlinkedModelSerializer):
             'device_title',
             'device_serial_number',
             'device_hub',
-            'device_sensors_url'
+            'device_sensors_url',
+            'sensors_data_fetch_time'
         )
 
 
@@ -113,7 +114,7 @@ class HubModelSerializer(HyperlinkedModelSerializer):
             'hub_title',
             'hub_serial_number',
             'owner',
+            'devices_data_fetch_time',
+            'hub_data_update_time',
             'devices_url'
         )
-
-# TODO Serilize timedelta
