@@ -27,7 +27,7 @@ class UserBaseSerializer(ModelSerializer):
         fields = (
             'id',
             'username',
-            'email',
             'first_name',
             'last_name',
+            'email',
         )

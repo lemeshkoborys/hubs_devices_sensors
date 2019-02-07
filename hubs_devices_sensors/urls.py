@@ -130,6 +130,11 @@ DEVICES_URLS = [
         name='device-sensors'
     ),
     path(
+        'devices/<int:pk>/delete/',
+        DeviceRetrieveUpdateDestroy.as_view(),
+        name='device-delete'
+    ),
+    path(
         # e.g ?start_datetime=2018-01-02T21:25:33Z&end_datetime=2018-01-02T22:45:33Z
         'devices/<int:pk>/sensors-collected-data/',
         SensorCollectedDataTimeRangeAPIView.as_view(),

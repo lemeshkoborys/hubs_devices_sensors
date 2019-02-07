@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'rest_registration',
     'corsheaders',
     'hubs_devices_sensors',
+    'index_app'
 ]
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
@@ -102,7 +104,7 @@ WSGI_APPLICATION = 'test_task.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'task_db',
+        'NAME': 'task_db_1',
     }
 }
 

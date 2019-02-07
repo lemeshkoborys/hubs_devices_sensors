@@ -19,7 +19,7 @@ from index_app.views import UserListAPIView
 
 API_URLPATTERNS = [
     path('users/', include('rest_registration.api.urls')),
-    path('users/all', UserListAPIView.as_view()),
+    path('users/all/', UserListAPIView.as_view()),
     path('tools/', include('hubs_devices_sensors.urls'))
 ]
 
