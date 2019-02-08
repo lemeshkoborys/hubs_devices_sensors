@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase, APIRequestFactory
 from rest_framework import status
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.request import Request
 from django.contrib.auth.models import User
 from hubs_devices_sensors.models import Device, Hub, Sensor, SensorCollectedData
@@ -59,6 +60,37 @@ class SensorCanCreateAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, serialized_sensor.data)
+
+    def test_sensor_create_not_authenticated(self):
+        self.client.logout()
+        sensor_data_to_post = {
+            'sensor_title': 'My pH Sensor',
+            'sensor_serial_number': 'XJHFJQWH6EASSAS2',
+            'sensor_data_type': 'pH',
+            'sensor_device': self.device.device_serial_number
+        }
+
+        response = self.client.post(
+            path=self.url,
+            data=sensor_data_to_post,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_create_invalid_data(self):
+        sensor_invalid_create_data = {
+            'sensor_title': '',
+            'sensor_serial_number': 'XJHFJQWH6EASSAS2awsdasd',
+            'sensor_data_type': 'Bubble',
+            'sensor_device': self.device.device_serial_number
+        }
+
+        response = self.client.post(
+            path=self.url,
+            data=sensor_invalid_create_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class SensorCanGetAPITestCase(APITestCase):
@@ -164,6 +196,30 @@ class SensorCanGetAPITestCase(APITestCase):
 
         self.assertEqual(response.data, serialized_sensor_data_collected.data)
 
+    def test_get_sensors_not_authorized(self):
+        self.client.logout()
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_sensor_permission_denied(self):
+        self.client.logout()
+        User.objects.create_user(
+            'user',
+            'user@example.com',
+            'userPassword'
+        )
+        self.client.login(
+            username='user',
+            password='userPassword'
+        )
+        response = self.client.get(self.single_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_get_not_found(self):
+        self.single_url = '/api/tools/sensors/123/'
+        response = self.client.get(self.single_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class SensorCanUpdateAPITesCase(APITestCase):
 
@@ -246,6 +302,120 @@ class SensorCanUpdateAPITesCase(APITestCase):
             sensor_data_to_patch['sensor_title']
         )
 
+    def test_sensor_put_not_authorized(self):
+        self.client.logout()
+        sensor_data_to_put = {
+            'sensor_title': 'Updated Title',
+            'sensor_serial_number': 'updatedserial',
+            'sensor_device': self.device.device_serial_number,
+            'sensor_data_type': 'pH'
+        }
+        response = self.client.put(
+            path=self.url,
+            data=sensor_data_to_put,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_patch_not_authorized(self):
+        self.client.logout()
+        sensor_data_to_patch = {
+            'sensor_title': 'Updated Title'
+        }
+        response = self.client.patch(
+            path=self.url,
+            data=sensor_data_to_patch,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_put_permission_denied(self):
+        self.client.logout()
+        User.objects.create_user(
+            'user',
+            'email@example.com',
+            'password'
+        )
+        self.client.login(
+            username='user',
+            password='password'
+        )
+
+        sensor_data_to_put = {
+            'sensor_title': 'Updated Title',
+            'sensor_serial_number': 'updatedserial',
+            'sensor_device': self.device.device_serial_number,
+            'sensor_data_type': 'pH'
+        }
+        response = self.client.put(
+            path=self.url,
+            data=sensor_data_to_put,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_patch_permission_denied(self):
+        self.client.logout()
+        User.objects.create_user(
+            'user',
+            'email@example.com',
+            'password'
+        )
+        self.client.login(
+            username='user',
+            password='password'
+        )
+
+        sensor_data_to_patch = {
+            'sensor_title': 'Updated Title',
+        }
+        response = self.client.patch(
+            path=self.url,
+            data=sensor_data_to_patch,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_update_bad_request(self):
+        sensor_invalid_update_data = {
+            'sensor_title': ''
+        }
+
+        patch_response = self.client.patch(
+            path=self.url,
+            data=sensor_invalid_update_data,
+            format='json'
+        )
+        put_response = self.client.put(
+            path=self.url,
+            data=sensor_invalid_update_data,
+            format='json'
+        )
+        self.assertEqual(patch_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(put_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_sensor_update_not_found(self):
+        self.url = '/api/tools/sensors/123321/update/'
+        sensor_data_to_update = {
+            'sensor_title': 'Updated Title',
+            'sensor_serial_number': 'updatedserial',
+            'sensor_device': self.device.device_serial_number,
+            'sensor_data_type': 'pH'
+        }
+
+        patch_response = self.client.patch(
+            path=self.url,
+            data=sensor_data_to_update,
+            format='json'
+        )
+        put_response = self.client.put(
+            path=self.url,
+            data=sensor_data_to_update,
+            format='json'
+        )
+        self.assertEqual(patch_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(put_response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class SensorCanDeleteAPITestCase(APITestCase):
 
@@ -254,6 +424,12 @@ class SensorCanDeleteAPITestCase(APITestCase):
             'admin',
             'admin@example.com',
             'AdminStrongPassword'
+        )
+
+        self.invalid_user = User.objects.create_user(
+            'user',
+            'user@example.com',
+            'password'
         )
 
         self.client.login(
@@ -286,6 +462,25 @@ class SensorCanDeleteAPITestCase(APITestCase):
     def test_sensor_can_delete(self):
         response = self.client.delete(path=self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_sensor_delete_not_authorized(self):
+        self.client.logout()
+        response = self.client.delete(path=self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_delete_permission_denied(self):
+        self.client.logout()
+        self.client.login(
+            username=self.invalid_user.username,
+            password=self.invalid_user.password
+        )
+        response = self.client.delete(path=self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sensor_delete_not_found(self):
+        self.url = '/api/tools/sensors/123332/delete/'
+        response = self.client.delete(path=self.url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class SensorCanCollectDataAPITestCase(APITestCase):
@@ -349,9 +544,27 @@ class SensorCanCollectDataAPITestCase(APITestCase):
         )
 
         serialized_sensor_collected_data = SensorCollectedDataModelSerializer(
-            SensorCollectedData.objects,filter(sensor=self.sensor),
+            SensorCollectedData.objects.filter(sensor=self.sensor),
             many=True,
             context={'request': self.request}
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, serialized_sensor_collected_data.data)
+
+    def test_sensor_collect_data_bad_request(self):
+
+        sensor_data_to_collect = [
+            {
+                'sensor': 'asd',
+                'sensor_data_value': 'asdddddddddd',
+                'date_time_collected': 'hellllllllloooouuu'
+            }
+        ]
+
+        response = self.client.post(
+            path=self.url,
+            data=sensor_data_to_collect,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

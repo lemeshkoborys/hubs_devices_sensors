@@ -9,6 +9,7 @@ import datetime
 
 factory = APIRequestFactory()
 
+
 class DeviceCanCreateAPITestCase(APITestCase):
 
     def setUp(self):
@@ -47,6 +48,37 @@ class DeviceCanCreateAPITestCase(APITestCase):
             Device.objects.first().device_title,
             device_data_to_create['device_title']
         )
+
+    def test_device_create_not_authorized(self):
+        self.client.logout()
+        device_data_to_create = {
+            'device_title': 'My Device',
+            'device_serial_number': 'DeviceSerialNum',
+            'device_hub': self.hub.hub_serial_number
+        }
+
+        response = self.client.post(
+            CONSTS.DEVICE_CREATE_URL,
+            data=device_data_to_create,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_create_bad_request(self):
+        device_data_to_create = {
+            'device_title': '',
+            'device_serial_number': 12312222,
+            'device_hub': True
+        }
+
+        response = self.client.post(
+            CONSTS.DEVICE_CREATE_URL,
+            data=device_data_to_create,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class DeviceCanGetListAPITestCase(APITestCase):
@@ -100,6 +132,11 @@ class DeviceCanGetListAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized_hubs.data)
 
+    def test_device_get_list_not_authorized(self):
+        self.client.logout()
+        response = self.client.get(CONSTS.DEVICE_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class DeviceCanGetSingleAPITestCase(APITestCase):
 
@@ -115,6 +152,12 @@ class DeviceCanGetSingleAPITestCase(APITestCase):
             password='AdminStrongPassword'
         )
 
+        self.invalid_user = User.objects.create_user(
+            'user',
+            'user@example.com',
+            'password'
+        )
+
         self.hub = Hub.objects.create(
             hub_title='My Hub',
             hub_serial_number='HubSerialNumber',
@@ -128,6 +171,7 @@ class DeviceCanGetSingleAPITestCase(APITestCase):
         )
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/'
+        self.invalid_url = '/api/tools/devices/1231231231/'
         self.request = Request(factory.get(self.url))
 
     def test_device_can_get_single(self):
@@ -140,6 +184,24 @@ class DeviceCanGetSingleAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized_device.data)
+
+    def test_device_get_single_not_authorized(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_get_single_permission_denied(self):
+        self.client.logout()
+        self.client.login(
+            username=self.invalid_user.username,
+            password=self.invalid_user.password
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_get_single_not_found(self):
+        response = self.client.get(self.invalid_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeviceCanUpdateAPITestCase(APITestCase):
@@ -156,6 +218,12 @@ class DeviceCanUpdateAPITestCase(APITestCase):
             password='AdminStrongPassword'
         )
 
+        self.invalid_user = User.objects.create_user(
+            'user',
+            'user@example.com',
+            'password'
+        )
+
         self.hub = Hub.objects.create(
             hub_title='My Hub',
             hub_serial_number='HubSerialNumber',
@@ -169,6 +237,7 @@ class DeviceCanUpdateAPITestCase(APITestCase):
         )
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/update/'
+        self.invalid_url = '/api/tools/devices/333442/update/'
         self.request = Request(factory.get(self.url))
     
     def test_device_can_put(self):
@@ -218,6 +287,96 @@ class DeviceCanUpdateAPITestCase(APITestCase):
             data_to_patch['device_title']
         )
 
+    def test_device_update_not_authorized(self):
+        self.client.logout()
+        data_to_update = {
+            'device_title': 'Updated Title',
+            'device_serial_number': 'UpdatedSerial',
+            'device_hub': self.hub.hub_serial_number,
+            'sensors_data_fetch_time': '00:05:00'
+        }
+        put_response = self.client.put(
+            path=self.url,
+            data=data_to_update,
+            format='json'
+        )
+        patch_response = self.client.patch(
+            path=self.url,
+            data=data_to_update,
+            format='json'
+        )
+
+        self.assertEqual(put_response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(patch_response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_update_permission_denied(self):
+        self.client.logout()
+        self.client.login(
+            username=self.invalid_user.username,
+            password=self.invalid_user.password
+        )
+        data_to_update = {
+            'device_title': 'Updated Title',
+            'device_serial_number': 'UpdatedSerial',
+            'device_hub': self.hub.hub_serial_number,
+            'sensors_data_fetch_time': '00:05:00'
+        }
+        put_response = self.client.put(
+            path=self.url,
+            data=data_to_update,
+            format='json'
+        )
+        patch_response = self.client.patch(
+            path=self.url,
+            data=data_to_update,
+            format='json'
+        )
+
+        self.assertEqual(put_response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(patch_response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_update_not_found(self):
+        data_to_update = {
+            'device_title': 'Updated Title',
+            'device_serial_number': 'UpdatedSerial',
+            'device_hub': self.hub.hub_serial_number,
+            'sensors_data_fetch_time': '00:05:00'
+        }
+        put_response = self.client.put(
+            path=self.invalid_url,
+            data=data_to_update,
+            format='json'
+        )
+        patch_response = self.client.patch(
+            path=self.invalid_url,
+            data=data_to_update,
+            format='json'
+        )
+
+        self.assertEqual(put_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(patch_response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_device_update_bad_request(self):
+        invalid_data_to_update = {
+            'device_title': '',
+            'device_serial_number': 3333,
+            'device_hub': 'heeeelooooo',
+            'sensors_data_fetch_time': False
+        }
+        put_response = self.client.put(
+            path=self.url,
+            data=invalid_data_to_update,
+            format='json'
+        )
+        patch_response = self.client.patch(
+            path=self.url,
+            data=invalid_data_to_update,
+            format='json'
+        )
+
+        self.assertEqual(put_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(patch_response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class DeviceCanDeleteAPITestCase(APITestCase):
 
@@ -233,6 +392,12 @@ class DeviceCanDeleteAPITestCase(APITestCase):
             password='AdminStrongPassword'
         )
 
+        self.invalid_user = User.objects.create_user(
+            'user',
+            'user@example.com',
+            'password'
+        )
+
         self.hub = Hub.objects.create(
             hub_title='My Hub',
             hub_serial_number='HubSerialNumber',
@@ -246,11 +411,30 @@ class DeviceCanDeleteAPITestCase(APITestCase):
         )
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/delete/'
+        self.invalid_url = '/api/tools/devices/12322/delete/'
         self.request = Request(factory.get(self.url))
 
     def test_device_can_delete(self):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_device_delete_not_authorized(self):
+        self.client.logout()
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_delete_permission_denied(self):
+        self.client.logout()
+        self.client.login(
+            username=self.invalid_user.username,
+            password=self.invalid_user.password
+        )
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_delete_not_found(self):
+        response = self.client.delete(self.invalid_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeviceGetSensorsAPITestCase(APITestCase):
@@ -265,6 +449,12 @@ class DeviceGetSensorsAPITestCase(APITestCase):
         self.client.login(
             username='admin',
             password='AdminStrongPassword'
+        )
+
+        self.invalid_user = User.objects.create_user(
+            'user',
+            'user@example.com',
+            'password'
         )
 
         self.hub = Hub.objects.create(
@@ -301,6 +491,7 @@ class DeviceGetSensorsAPITestCase(APITestCase):
         )
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/sensors/'
+        self.invalid_url = '/api/tools/devices/123/sensors/'
         self.request = Request(factory.get(self.url))
 
     def test_device_get_sensors(self):
@@ -312,6 +503,24 @@ class DeviceGetSensorsAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized_sensors.data)
+
+    def test_device_get_sensors_not_authorized(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_get_sensors_permission_denied(self):
+        self.client.logout()
+        self.client.login(
+            username=self.invalid_user.username,
+            password=self.invalid_user.username
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_get_sensors_not_found(self):
+        response = self.client.get(self.invalid_url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
@@ -326,6 +535,12 @@ class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
         self.client.login(
             username='admin',
             password='AdminStrongPassword'
+        )
+
+        self.invalid_user = User.objects.create_user(
+            'user',
+            'user@example.com',
+            'password'
         )
 
         self.hub = Hub.objects.create(
@@ -382,6 +597,7 @@ class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
         url_end = '/sensors-collected-data/'
         url_params = '?start_datetime=2019-02-07T08:10:22Z&end_datetime=2019-02-07T15:10:32Z'
         self.url = url_start + str(self.device.id) + url_end + url_params
+        self.invalid_url = url_start + '123332' + url_end + url_params
         self.request = Request(factory.get(self.url))
 
     def test_device_get_sensors_collected_data_time_range(self):
@@ -395,5 +611,20 @@ class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized_collected_data.data)
 
-    
-    
+    def test_device_get_sensors_collected_data_not_authorized(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_get_sensors_collected_data_permission_denied(self):
+        self.client.logout()
+        self.client.login(
+            username=self.invalid_user.username,
+            password=self.invalid_user.username
+        )
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_device_get_sensors_collected_data_not_found(self):
+        with self.assertRaises(Device.DoesNotExist):
+            self.client.get(self.invalid_url)
