@@ -1,18 +1,40 @@
+"""
+Test Cases for Device Entities
+Available test cases:
+    DeviceCanCreateAPITestCase,
+    DeviceCanGetListAPITestCase,
+    DeviceCanGetSingleAPITestCase,
+    DeviceCanUpdateAPITestCase,
+    DeviceCanDeleteAPITestCase,
+    DeviceGetSensorsAPITestCase,
+    DeviceGetCollectedDataTimeRangeAPITestCase
+"""
+import datetime
 from rest_framework.test import APITestCase, APIRequestFactory
 from rest_framework import status
 from rest_framework.request import Request
 from django.contrib.auth.models import User
 from hubs_devices_sensors.models import Device, Hub, Sensor, SensorCollectedData
-from hubs_devices_sensors.serializers import DeviceModelSerializer, SensorModelSerializer, SensorCollectedDataModelSerializer
+from hubs_devices_sensors.serializers import (
+    DeviceModelSerializer,
+    SensorModelSerializer,
+    SensorCollectedDataModelSerializer
+)
 import hubs_devices_sensors.tests.test_consts as CONSTS
-import datetime
 
-factory = APIRequestFactory()
+FACTORY = APIRequestFactory()
 
 
 class DeviceCanCreateAPITestCase(APITestCase):
 
+    """
+    Test case check if the Device entity could be creaeted
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -30,6 +52,9 @@ class DeviceCanCreateAPITestCase(APITestCase):
         )
 
     def test_device_can_create(self):
+        """
+        Test that ensures that Device entity is being created
+        """
         device_data_to_create = {
             'device_title': 'My Device',
             'device_serial_number': 'DeviceSerialNum',
@@ -50,6 +75,9 @@ class DeviceCanCreateAPITestCase(APITestCase):
         )
 
     def test_device_create_not_authorized(self):
+        """
+        Test that ensures that sensor could not be created without authentification
+        """
         self.client.logout()
         device_data_to_create = {
             'device_title': 'My Device',
@@ -66,6 +94,9 @@ class DeviceCanCreateAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_create_bad_request(self):
+        """
+        Test that ensures that POST data could not be invalid
+        """
         device_data_to_create = {
             'device_title': '',
             'device_serial_number': 12312222,
@@ -83,7 +114,14 @@ class DeviceCanCreateAPITestCase(APITestCase):
 
 class DeviceCanGetListAPITestCase(APITestCase):
 
+    """
+    Test case chack if Sensor entities could be getted as list
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -120,9 +158,12 @@ class DeviceCanGetListAPITestCase(APITestCase):
         )
 
     def test_device_can_get_list(self):
+        """
+        Test that ensures that authenticated user can get own Device entities
+        """
         response = self.client.get(CONSTS.DEVICE_LIST_URL)
         context = {
-            'request': Request(factory.get(CONSTS.DEVICE_LIST_URL))
+            'request': Request(FACTORY.get(CONSTS.DEVICE_LIST_URL))
         }
         serialized_hubs = DeviceModelSerializer(
             Device.objects.all(),
@@ -133,6 +174,9 @@ class DeviceCanGetListAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_hubs.data)
 
     def test_device_get_list_not_authorized(self):
+        """
+        Test that ensures that Device entities could not be retirieved without authentification
+        """
         self.client.logout()
         response = self.client.get(CONSTS.DEVICE_LIST_URL)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -140,7 +184,14 @@ class DeviceCanGetListAPITestCase(APITestCase):
 
 class DeviceCanGetSingleAPITestCase(APITestCase):
 
+    """
+    Test case chack if Device single entity could be getted
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -172,9 +223,12 @@ class DeviceCanGetSingleAPITestCase(APITestCase):
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/'
         self.invalid_url = '/api/tools/devices/1231231231/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_device_can_get_single(self):
+        """
+        Test that ensures that authenticated user can get single Device entity
+        """
         response = self.client.get(self.url)
         serialized_device = DeviceModelSerializer(
             self.device,
@@ -186,11 +240,17 @@ class DeviceCanGetSingleAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_device.data)
 
     def test_device_get_single_not_authorized(self):
+        """
+        Test that ensures that Device entities could not be retirieved without authentification
+        """
         self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_get_single_permission_denied(self):
+        """
+        Test that ensures that Device entity could not be retrieved by other users
+        """
         self.client.logout()
         self.client.login(
             username=self.invalid_user.username,
@@ -200,13 +260,23 @@ class DeviceCanGetSingleAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_get_single_not_found(self):
+        """
+        Test that ensures that system would notify that Device entity is not found
+        """
         response = self.client.get(self.invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeviceCanUpdateAPITestCase(APITestCase):
 
+    """
+    Test case checks that Device entity could be updated
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -238,9 +308,12 @@ class DeviceCanUpdateAPITestCase(APITestCase):
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/update/'
         self.invalid_url = '/api/tools/devices/333442/update/'
-        self.request = Request(factory.get(self.url))
-    
+        self.request = Request(FACTORY.get(self.url))
+
     def test_device_can_put(self):
+        """
+        Test that ensures that Device entity could be updated by PUT method
+        """
         data_to_put = {
             'device_title': 'Updated Title',
             'device_serial_number': 'UpdatedSerial',
@@ -264,8 +337,12 @@ class DeviceCanUpdateAPITestCase(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serialized_device.data)
-    
+
     def test_device_can_patch(self):
+        """
+        Test that ensures that Device entity could not be updated without authentification
+        using PUT method
+        """
         data_to_patch = {
             'device_title': 'Patched title'
         }
@@ -288,6 +365,10 @@ class DeviceCanUpdateAPITestCase(APITestCase):
         )
 
     def test_device_update_not_authorized(self):
+        """
+        Test that ensures that Sensor entity could not be partly updated without
+        authentification using PATCH method
+        """
         self.client.logout()
         data_to_update = {
             'device_title': 'Updated Title',
@@ -310,6 +391,10 @@ class DeviceCanUpdateAPITestCase(APITestCase):
         self.assertEqual(patch_response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_update_permission_denied(self):
+        """
+        Test that ensures that Device entity could not be updated or partly updated
+        by other users using PUT or PATCH method
+        """
         self.client.logout()
         self.client.login(
             username=self.invalid_user.username,
@@ -336,6 +421,9 @@ class DeviceCanUpdateAPITestCase(APITestCase):
         self.assertEqual(patch_response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_update_not_found(self):
+        """
+        Test that ensures that system would notify that Device entity is not found
+        """
         data_to_update = {
             'device_title': 'Updated Title',
             'device_serial_number': 'UpdatedSerial',
@@ -357,6 +445,9 @@ class DeviceCanUpdateAPITestCase(APITestCase):
         self.assertEqual(patch_response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_device_update_bad_request(self):
+        """
+        Test taht ensures that Device entity could not be updated by bad request (invalid data)
+        """
         invalid_data_to_update = {
             'device_title': '',
             'device_serial_number': 3333,
@@ -380,7 +471,14 @@ class DeviceCanUpdateAPITestCase(APITestCase):
 
 class DeviceCanDeleteAPITestCase(APITestCase):
 
+    """
+    Test case checks that Device entity could be deleted
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -412,18 +510,27 @@ class DeviceCanDeleteAPITestCase(APITestCase):
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/delete/'
         self.invalid_url = '/api/tools/devices/12322/delete/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_device_can_delete(self):
+        """
+        Test that ensures that Device entity could be deleted by authorized user
+        """
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_device_delete_not_authorized(self):
+        """
+        Test that ensures that Device entity could not be deleted by unauthorized user
+        """
         self.client.logout()
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_delete_permission_denied(self):
+        """
+        Test that ensures that Device entity could not be deleted by other users
+        """
         self.client.logout()
         self.client.login(
             username=self.invalid_user.username,
@@ -433,13 +540,23 @@ class DeviceCanDeleteAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_delete_not_found(self):
+        """
+        Test that ensures that system would notify that Sensor entity is not found
+        """
         response = self.client.delete(self.invalid_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeviceGetSensorsAPITestCase(APITestCase):
 
+    """
+    Test case checks if Sensor entities could be retrieved for certain Device entity
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -492,9 +609,12 @@ class DeviceGetSensorsAPITestCase(APITestCase):
 
         self.url = '/api/tools/devices/' + str(self.device.id) + '/sensors/'
         self.invalid_url = '/api/tools/devices/123/sensors/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_device_get_sensors(self):
+        """
+        Test that ensures that Sensor entities could be retrieved for certain Device
+        """
         response = self.client.get(self.url)
         serialized_sensors = SensorModelSerializer(
             Sensor.objects.filter(sensor_device=self.device),
@@ -505,11 +625,17 @@ class DeviceGetSensorsAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_sensors.data)
 
     def test_device_get_sensors_not_authorized(self):
+        """
+        Test that ensures that not authorized users cannot retrieve Sensor entities
+        """
         self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_get_sensors_permission_denied(self):
+        """
+        Test that ensures that other users cannot retrieve Sensor entities
+        """
         self.client.logout()
         self.client.login(
             username=self.invalid_user.username,
@@ -519,13 +645,24 @@ class DeviceGetSensorsAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_get_sensors_not_found(self):
-        response = self.client.get(self.invalid_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        """
+        Test that ensures that system would notify that Device entity is not found
+        """
+        with self.assertRaises(Device.DoesNotExist):
+            self.client.get(self.invalid_url)
 
 
 class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
 
+    """
+    Test case checks if SensorCollectedData entities could be retrieved
+    by certain User and time range
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -598,9 +735,13 @@ class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
         url_params = '?start_datetime=2019-02-07T08:10:22Z&end_datetime=2019-02-07T15:10:32Z'
         self.url = url_start + str(self.device.id) + url_end + url_params
         self.invalid_url = url_start + '123332' + url_end + url_params
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_device_get_sensors_collected_data_time_range(self):
+        """
+        Test that ensures that SensorCollectedData entities could be retrieved
+        by authorized Users and certain datetime range
+        """
         response = self.client.get(self.url)
 
         serialized_collected_data = SensorCollectedDataModelSerializer(
@@ -612,11 +753,19 @@ class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_collected_data.data)
 
     def test_device_get_sensors_collected_data_not_authorized(self):
+        """
+        Test that ensures that SensorCollectedData entities could not be retrieved
+        by unauthorized Users and certain datetime range
+        """
         self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_get_sensors_collected_data_permission_denied(self):
+        """
+        Test that ensures that SensorCollectedData with certain datetime range entities
+        could not be retrieved by other Users
+        """
         self.client.logout()
         self.client.login(
             username=self.invalid_user.username,
@@ -626,5 +775,8 @@ class DeviceGetCollectedDataTimeRangeAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_device_get_sensors_collected_data_not_found(self):
+        """
+        Test that ensures that system would notify that Device entity is not found
+        """
         with self.assertRaises(Device.DoesNotExist):
             self.client.get(self.invalid_url)

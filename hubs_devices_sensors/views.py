@@ -108,7 +108,9 @@ class DeviceRetrieveUpdateDestroy(generics.RetrieveUpdateDestroyAPIView):
 
 class DeviceListSensorsAPIView(generics.ListAPIView):
 
-    # TODO Comments
+    """
+    ClassBasedView tath lists all Sensor entities related Device
+    """
 
     permission_classes = (IsAuthenticated, )
     serializer_class = serializers.SensorModelSerializer
@@ -184,7 +186,9 @@ class HubRetrieveUpateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class HubDevicesListAPIView(generics.ListAPIView):
 
-    # TODO Comments
+    """
+    ClassBasedView that lists all Device entities related to Hub
+    """
 
     permission_classes = (IsAuthenticated, )
     serializer_class = serializers.HubModelSerializer
@@ -206,7 +210,9 @@ class SensorCollectedDataListCreateAPIView(APIView):
 
     def post(self, request, format=None):
 
-        # TODO method docstring
+        """
+        Post method that creaetes SensorCollectedData entities by POST request
+        """
 
         serializer = serializers.SensorCollectedDataModelSerializer(data=request.data, many=True)
         if serializer.is_valid():
@@ -277,6 +283,11 @@ class OneSensorCollectedDataUserAPIView(generics.ListAPIView):
 
 
 class SensorCollectedDataTimeRangeAPIView(generics.ListAPIView):
+
+    """
+    ClassBasedView taht lists all SensorCollectedData related to Device and
+    filtered by time range
+    """
 
     permission_classes = (IsAuthenticated, )
     serializer_class = serializers.SensorCollectedDataModelSerializer

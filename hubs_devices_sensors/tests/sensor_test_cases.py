@@ -1,19 +1,36 @@
+"""
+Sensor Test Cases
+Available test cases:
+    SensorCanCreateAPITestCase,
+    SensorCanGetAPITestCase,
+    SensorCanUpdateAPITesCase,
+    SensorCanDeleteAPITestCase,
+    SensorCanCollectDataAPITestCase
+"""
+import datetime
 from rest_framework.test import APITestCase, APIRequestFactory
 from rest_framework import status
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.request import Request
 from django.contrib.auth.models import User
 from hubs_devices_sensors.models import Device, Hub, Sensor, SensorCollectedData
-from hubs_devices_sensors.serializers import DeviceModelSerializer, SensorModelSerializer, SensorCollectedDataModelSerializer
-import hubs_devices_sensors.tests.test_consts as CONSTS
-import datetime
+from hubs_devices_sensors.serializers import (
+    SensorModelSerializer,
+    SensorCollectedDataModelSerializer
+)
 
-factory = APIRequestFactory()
+FACTORY = APIRequestFactory()
 
 
 class SensorCanCreateAPITestCase(APITestCase):
 
+    """
+    Test case check if the Sensor entity could be creaeted
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -38,9 +55,12 @@ class SensorCanCreateAPITestCase(APITestCase):
         )
 
         self.url = '/api/tools/sensors/create/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_sensor_can_create(self):
+        """
+        Test that ensures that sensor entity is being created
+        """
         sensor_data_to_post = {
             'sensor_title': 'My pH Sensor',
             'sensor_serial_number': 'XJHFJQWH6EASSAS2',
@@ -62,6 +82,9 @@ class SensorCanCreateAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_sensor.data)
 
     def test_sensor_create_not_authenticated(self):
+        """
+        Test that ensures that sensor could not be created without authentification
+        """
         self.client.logout()
         sensor_data_to_post = {
             'sensor_title': 'My pH Sensor',
@@ -78,6 +101,9 @@ class SensorCanCreateAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_create_invalid_data(self):
+        """
+        Test that ensures that POST data could not be invalid
+        """
         sensor_invalid_create_data = {
             'sensor_title': '',
             'sensor_serial_number': 'XJHFJQWH6EASSAS2awsdasd',
@@ -94,8 +120,14 @@ class SensorCanCreateAPITestCase(APITestCase):
 
 
 class SensorCanGetAPITestCase(APITestCase):
+    """
+    Test case chack if Sensor entity could be getted
+    """
 
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -143,12 +175,12 @@ class SensorCanGetAPITestCase(APITestCase):
         self.list_url = '/api/tools/sensors/'
         self.single_url = '/api/tools/sensors/' + str(Sensor.objects.first().id) + '/'
 
-    def tearDown(self):
-        Sensor.objects.all().delete()
-
     def test_sensor_get_list(self):
+        """
+        Test that ensures that authenticated user can get own Sensor entities
+        """
 
-        request = Request(factory.get(self.list_url))
+        request = Request(FACTORY.get(self.list_url))
         response = self.client.get(self.list_url)
 
         serialized_sensors = SensorModelSerializer(
@@ -160,7 +192,10 @@ class SensorCanGetAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_sensors.data)
 
     def test_sensor_get_single(self):
-        request = Request(factory.get(self.single_url))
+        """
+        Test that ensures that authenticated user can get single Sensor entity
+        """
+        request = Request(FACTORY.get(self.single_url))
         response = self.client.get(self.single_url)
 
         serialized_sensor = SensorModelSerializer(
@@ -170,6 +205,9 @@ class SensorCanGetAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_sensor.data)
 
     def test_sensor_get_collected_data(self):
+        """
+        Test that ensures that authenticated user can get own Sensor Collected Data entities
+        """
 
         SensorCollectedData.objects.create(
             sensor=self.sensor,
@@ -184,7 +222,7 @@ class SensorCanGetAPITestCase(APITestCase):
         )
 
         url = '/api/tools/sensors/' + str(self.sensor.id) + '/collected-data/'
-        request = Request(factory.get(url))
+        request = Request(FACTORY.get(url))
 
         response = self.client.get(url)
 
@@ -197,11 +235,17 @@ class SensorCanGetAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_sensor_data_collected.data)
 
     def test_get_sensors_not_authorized(self):
+        """
+        Test that ensures that Sensor entities could not be retirieved without authentification
+        """
         self.client.logout()
         response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_sensor_permission_denied(self):
+        """
+        Test that ensures that Sensor entity could not be retrieved by other users
+        """
         self.client.logout()
         User.objects.create_user(
             'user',
@@ -216,6 +260,9 @@ class SensorCanGetAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_get_not_found(self):
+        """
+        Test that ensures that system would notify that Sensor entity is not found
+        """
         self.single_url = '/api/tools/sensors/123/'
         response = self.client.get(self.single_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -223,7 +270,14 @@ class SensorCanGetAPITestCase(APITestCase):
 
 class SensorCanUpdateAPITesCase(APITestCase):
 
+    """
+    Test case checks that Sensor entity could be updated
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -255,9 +309,12 @@ class SensorCanUpdateAPITesCase(APITestCase):
         )
 
         self.url = '/api/tools/sensors/' + str(self.sensor.id) + '/update/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_sensor_can_put(self):
+        """
+        Test that ensures that Sensor entity could be updated by PUT method
+        """
         sensor_data_to_put = {
             'sensor_title': 'Updated Title',
             'sensor_serial_number': 'updatedserial',
@@ -282,6 +339,9 @@ class SensorCanUpdateAPITesCase(APITestCase):
         )
 
     def test_sensor_can_patch(self):
+        """
+        Test ensures that Sensor entity could be partly updated by PATCH method
+        """
         sensor_data_to_patch = {
             'sensor_title': 'Patched title'
         }
@@ -303,6 +363,10 @@ class SensorCanUpdateAPITesCase(APITestCase):
         )
 
     def test_sensor_put_not_authorized(self):
+        """
+        Test that ensures that Sensor entity could not be updated without authentification
+        using PUT method
+        """
         self.client.logout()
         sensor_data_to_put = {
             'sensor_title': 'Updated Title',
@@ -318,6 +382,10 @@ class SensorCanUpdateAPITesCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_patch_not_authorized(self):
+        """
+        Test that ensures that Sensor entity could not be partly updated without
+        authentification using PATCH method
+        """
         self.client.logout()
         sensor_data_to_patch = {
             'sensor_title': 'Updated Title'
@@ -330,6 +398,10 @@ class SensorCanUpdateAPITesCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_put_permission_denied(self):
+        """
+        Test that ensures that Sensor entity could not be updated by other users
+        using PUT method
+        """
         self.client.logout()
         User.objects.create_user(
             'user',
@@ -355,6 +427,10 @@ class SensorCanUpdateAPITesCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_patch_permission_denied(self):
+        """
+        Test that ensures that Sensor entity could not be partly updated
+        by other users using PATCH method
+        """
         self.client.logout()
         User.objects.create_user(
             'user',
@@ -377,6 +453,9 @@ class SensorCanUpdateAPITesCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_update_bad_request(self):
+        """
+        Test taht ensures that Sensor entity could not be updated by bad request (invalid data)
+        """
         sensor_invalid_update_data = {
             'sensor_title': ''
         }
@@ -395,6 +474,9 @@ class SensorCanUpdateAPITesCase(APITestCase):
         self.assertEqual(put_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_sensor_update_not_found(self):
+        """
+        Test that ensures that system would notify that Sensor entity is not found
+        """
         self.url = '/api/tools/sensors/123321/update/'
         sensor_data_to_update = {
             'sensor_title': 'Updated Title',
@@ -419,7 +501,14 @@ class SensorCanUpdateAPITesCase(APITestCase):
 
 class SensorCanDeleteAPITestCase(APITestCase):
 
+    """
+    Test case checks that Sensor entity could be deleted
+    """
+
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -457,18 +546,27 @@ class SensorCanDeleteAPITestCase(APITestCase):
         )
 
         self.url = '/api/tools/sensors/' + str(self.sensor.id) + '/delete/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def test_sensor_can_delete(self):
+        """
+        Test that ensures that Sensor entity could be deleted by authorized user
+        """
         response = self.client.delete(path=self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_sensor_delete_not_authorized(self):
+        """
+        Test that ensures that Sensor entity could not be deleted by unauthorized user
+        """
         self.client.logout()
         response = self.client.delete(path=self.url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_delete_permission_denied(self):
+        """
+        Test that ensures that Sensor entity could not be deleted by other users
+        """
         self.client.logout()
         self.client.login(
             username=self.invalid_user.username,
@@ -478,14 +576,23 @@ class SensorCanDeleteAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sensor_delete_not_found(self):
+        """
+        Test that ensures that system would notify that Sensor entity is not found
+        """
         self.url = '/api/tools/sensors/123332/delete/'
         response = self.client.delete(path=self.url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class SensorCanCollectDataAPITestCase(APITestCase):
+    """
+    Test case checks that SensorCollectedData enteties could be created
+    """
 
     def setUp(self):
+        """
+        Method make core actions to proceed the test case
+        """
         self.superuser = User.objects.create_superuser(
             'admin',
             'admin@example.com',
@@ -516,9 +623,12 @@ class SensorCanCollectDataAPITestCase(APITestCase):
             sensor_data_type='pH'
         )
         self.url = '/api/tools/sensors/collect-data/'
-        self.request = Request(factory.get(self.url))
+        self.request = Request(FACTORY.get(self.url))
 
     def sensor_can_collect_data(self):
+        """
+        Test ensures that SensorCollectedData entities could be created
+        """
         sensor_data_to_collect = [
             {
                 'sensor': self.sensor.sensor_serial_number,
@@ -552,6 +662,10 @@ class SensorCanCollectDataAPITestCase(APITestCase):
         self.assertEqual(response.data, serialized_sensor_collected_data.data)
 
     def test_sensor_collect_data_bad_request(self):
+        """
+        Test that ensures that SensorCollectedData entities could not be created
+        by bad request (invalid data)
+        """
 
         sensor_data_to_collect = [
             {

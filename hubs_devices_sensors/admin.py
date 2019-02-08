@@ -1,3 +1,7 @@
+"""
+Admin.py
+Regestring entities for CRUD via Django admin panel
+"""
 from django.contrib import admin
 from .models import Sensor, Device, Hub, SensorCollectedData
 

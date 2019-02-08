@@ -2,10 +2,10 @@
 models.py
 Clases: Hub, Device, Sensor, SensorCollectedData
 """
+from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from datetime import timedelta
 import hubs_devices_sensors.sensor_consts as sensor_consts
 
 
@@ -203,7 +203,7 @@ class Hub(models.Model):
 
     class Meta:
         db_table = 'hubs'
-    
+
     devices_data_fetch_time = models.DurationField(
         verbose_name='Devices Data Fetch Time',
         default=timedelta(seconds=300)
