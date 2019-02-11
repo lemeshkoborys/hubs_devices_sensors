@@ -3,45 +3,48 @@ urls.py
 Contains routing for hubs_devices_sensors app
 """
 from django.urls import path
-from .views import (
-    SensorListCreateAPIView,
-    SensorRetrieveUpdateDestroyAPIView,
-    DeviceListCreateAPIView,
-    DeviceRetrieveUpdateDestroy,
-    DeviceListSensorsAPIView,
+from .views.sensors_collected_data_views import (
+    SensorCollectedDataListCreateAPIView,
+    SensorCollectedDataAdminAPIView,
+    SensorAllCollectedDataUserAPIView,
+    OneSensorCollectedDataUserAPIView
+)
+from .views.hub_views import (
     HubListAPIView,
     HubCreateAPIView,
     HubRetrieveUpateDestroyAPIView,
     HubDevicesListAPIView,
-    SensorCollectedDataListCreateAPIView,
-    SensorCollectedDataAdminAPIView,
-    SensorAllCollectedDataUserAPIView,
-    OneSensorCollectedDataUserAPIView,
-    SensorCollectedDataTimeRangeAPIView
+)
+
+from .views.sensor_views import (
+    SensorListAPIView,
+    SensorCreateAPIView,
+    SensorRetrieveUpdateDestroyAPIView
+)
+from .views.device_views import (
+    DeviceCreateAPIView,
+    DeviceListAPIView,
+    DeviceRetrieveUpdateDestroy,
+    DeviceListSensorsAPIView,
+    DeviceSensorsCollectedDataTimeRangeAPIView
 )
 
 
 # Available API paths:
 #     sensors/ - GET
 #     sensors/create/ - POST
-#     sensors/<int:pk>/ - GET
-#     sensors/<int:pk>/update/ - PUT, PATCH
-#     sensors/<int:pk>/delete/ - DELETE
+#     sensors/<int:pk>/ - GET, PUT, PATCH, DELETE
 #     sensors/collect-data/ - POST
 #     sensors/collected-data/admin/ - GET
 #     sensors/collected-data/ - GET
 #     sensors/<int:pk>/collected-data/ - GET
 #     devices/ - GET
 #     devices/create/ - POST
-#     devices/<int:pk>/ - GET
-#     devices/<int:pk>/update - PUT, PATCH
-#     devices/<int:pk>/delete - DELETE
+#     devices/<int:pk>/ - GET, PUT, PATCH, DELETE
 #     devices/<int:pk>/sensors/ - GET
 #     hubs/ - GET
 #     hubs/create/ - POST
-#     hubs/<int:pk>/ - GET
-#     hubs/<int:pk>/update/ - PUT, PATCH
-#     hubs/<int:pk>/delete/ - DELETE
+#     hubs/<int:pk>/ - GET, PUT, PATCH, DELETE
 #     hubs/<int:pk>/devices/ - GET
 
 
@@ -56,16 +59,6 @@ HUBS_URLS = [
         name='hub-detail'
     ),
     path(
-        'hubs/<int:pk>/update/',
-        HubRetrieveUpateDestroyAPIView.as_view(),
-        name='hub-update'
-    ),
-    path(
-        'hubs/<int:pk>/delete/',
-        HubRetrieveUpateDestroyAPIView.as_view(),
-        name='hub-delete'
-    ),
-    path(
         'hubs/<int:pk>/devices/',
         HubDevicesListAPIView.as_view(),
         name='hub-devices'
@@ -73,8 +66,8 @@ HUBS_URLS = [
 ]
 
 SENSORS_URLS = [
-    path('sensors/', SensorListCreateAPIView.as_view(), name='sensor-list'),
-    path('sensors/create/', SensorListCreateAPIView.as_view(), name='sensor-create'),
+    path('sensors/', SensorListAPIView.as_view(), name='sensor-list'),
+    path('sensors/create/', SensorCreateAPIView.as_view(), name='sensor-create'),
     path(
         'sensors/collect-data/',
         SensorCollectedDataListCreateAPIView.as_view(),
@@ -98,31 +91,15 @@ SENSORS_URLS = [
         SensorRetrieveUpdateDestroyAPIView.as_view(),
         name='sensor-detail'
     ),
-    path(
-        'sensors/<int:pk>/update/',
-        SensorRetrieveUpdateDestroyAPIView.as_view(),
-        name='sensor-update'
-    ),
-    path(
-        'sensors/<int:pk>/delete/',
-        SensorRetrieveUpdateDestroyAPIView.as_view(),
-        name='sensor-delete'
-    ),
-
 ]
 
 DEVICES_URLS = [
-    path('devices/', DeviceListCreateAPIView.as_view(), name='device-list'),
-    path('devices/create/', DeviceListCreateAPIView.as_view(), name='device-create'),
+    path('devices/', DeviceListAPIView.as_view(), name='device-list'),
+    path('devices/create/', DeviceCreateAPIView.as_view(), name='device-create'),
     path(
         'devices/<int:pk>/',
         DeviceRetrieveUpdateDestroy.as_view(),
         name='device-detail'
-    ),
-    path(
-        'devices/<int:pk>/update/',
-        DeviceRetrieveUpdateDestroy.as_view(),
-        name='device-update'
     ),
     path(
         'devices/<int:pk>/sensors/',
@@ -130,14 +107,9 @@ DEVICES_URLS = [
         name='device-sensors'
     ),
     path(
-        'devices/<int:pk>/delete/',
-        DeviceRetrieveUpdateDestroy.as_view(),
-        name='device-delete'
-    ),
-    path(
         # e.g ?start_datetime=2018-01-02T21:25:33Z&end_datetime=2018-01-02T22:45:33Z
         'devices/<int:pk>/sensors-collected-data/',
-        SensorCollectedDataTimeRangeAPIView.as_view(),
+        DeviceSensorsCollectedDataTimeRangeAPIView.as_view(),
         name='sensor-data-time-range'
     )
 ]

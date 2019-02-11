@@ -41,8 +41,11 @@ INSTALLED_APPS = [
     'rest_registration',
     'corsheaders',
     'hubs_devices_sensors',
-    'index_app'
+    'index_app',
+    'rest_framework_swagger',
 ]
+
+USE_SESSION_AUTH = True
 
 
 REST_FRAMEWORK = {

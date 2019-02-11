@@ -308,7 +308,7 @@ class SensorCanUpdateAPITesCase(APITestCase):
             sensor_data_type='pH'
         )
 
-        self.url = '/api/tools/sensors/' + str(self.sensor.id) + '/update/'
+        self.url = '/api/tools/sensors/' + str(self.sensor.id) + '/'
         self.request = Request(FACTORY.get(self.url))
 
     def test_sensor_can_put(self):
@@ -477,7 +477,7 @@ class SensorCanUpdateAPITesCase(APITestCase):
         """
         Test that ensures that system would notify that Sensor entity is not found
         """
-        self.url = '/api/tools/sensors/123321/update/'
+        self.url = '/api/tools/sensors/123321/'
         sensor_data_to_update = {
             'sensor_title': 'Updated Title',
             'sensor_serial_number': 'updatedserial',
@@ -545,7 +545,7 @@ class SensorCanDeleteAPITestCase(APITestCase):
             sensor_data_type='pH'
         )
 
-        self.url = '/api/tools/sensors/' + str(self.sensor.id) + '/delete/'
+        self.url = '/api/tools/sensors/' + str(self.sensor.id) + '/'
         self.request = Request(FACTORY.get(self.url))
 
     def test_sensor_can_delete(self):
@@ -579,7 +579,7 @@ class SensorCanDeleteAPITestCase(APITestCase):
         """
         Test that ensures that system would notify that Sensor entity is not found
         """
-        self.url = '/api/tools/sensors/123332/delete/'
+        self.url = '/api/tools/sensors/123332/'
         response = self.client.delete(path=self.url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

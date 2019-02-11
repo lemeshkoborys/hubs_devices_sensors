@@ -213,7 +213,7 @@ class HubCanUpdateAPITestCase(APITestCase):
             owner=self.superuser
         )
 
-        self.url = '/api/tools/hubs/' + str(self.hub.id) + '/update/'
+        self.url = '/api/tools/hubs/' + str(self.hub.id) + '/'
         self.request = Request(FACTORY.get(self.url))
 
     def test_hub_can_put(self):
@@ -357,7 +357,7 @@ class HubCanUpdateAPITestCase(APITestCase):
         """
         Test that ensures that system would notify that Hub entity is not found
         """
-        self.url = '/api/tools/hubs/123332/update/'
+        self.url = '/api/tools/hubs/123332/'
         data_to_put = {
             'hub_title': 'My updated Hub',
             'hub_serial_number': 'hubserialupdated',
@@ -403,7 +403,7 @@ class HubCanDeleteAPITestCase(APITestCase):
             owner=self.superuser
         )
 
-        self.url = '/api/tools/hubs/' + str(self.hub.id) + '/delete/'
+        self.url = '/api/tools/hubs/' + str(self.hub.id) + '/'
         self.request = Request(FACTORY.get(self.url))
 
     def test_can_delete(self):
@@ -439,7 +439,7 @@ class HubCanDeleteAPITestCase(APITestCase):
         """
         Test that ensures that system would notify that Hub entity is not found
         """
-        self.url = '/api/tools/hubs/123123123/delete/'
+        self.url = '/api/tools/hubs/123123123/'
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 

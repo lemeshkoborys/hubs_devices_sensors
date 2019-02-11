@@ -5,7 +5,6 @@ from .serializers import UserForAdminModelSerializer
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
-
 class UserListAPIView(generics.ListAPIView):
 
     """

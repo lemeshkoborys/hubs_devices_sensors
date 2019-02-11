@@ -306,8 +306,8 @@ class DeviceCanUpdateAPITestCase(APITestCase):
             device_hub=self.hub
         )
 
-        self.url = '/api/tools/devices/' + str(self.device.id) + '/update/'
-        self.invalid_url = '/api/tools/devices/333442/update/'
+        self.url = '/api/tools/devices/' + str(self.device.id) + '/'
+        self.invalid_url = '/api/tools/devices/333442/'
         self.request = Request(FACTORY.get(self.url))
 
     def test_device_can_put(self):
@@ -508,8 +508,8 @@ class DeviceCanDeleteAPITestCase(APITestCase):
             device_hub=self.hub
         )
 
-        self.url = '/api/tools/devices/' + str(self.device.id) + '/delete/'
-        self.invalid_url = '/api/tools/devices/12322/delete/'
+        self.url = '/api/tools/devices/' + str(self.device.id) + '/'
+        self.invalid_url = '/api/tools/devices/12322/'
         self.request = Request(FACTORY.get(self.url))
 
     def test_device_can_delete(self):

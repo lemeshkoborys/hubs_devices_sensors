@@ -1,6 +1,6 @@
 # USER API ENDPOINTS
-USER_REGISTER_URL = '/api/users/register/'
-USER_LOGIN_URL = '/api/users/login/'
-USER_LOGOUT_URL = '/api/users/logout/'
-USER_PROFILE_URL = '/api/users/profile/'
-USER_ADMIN_LIST = '/api/users/all/'
+USER_REGISTER_URL = '/accounts/register/'
+USER_LOGIN_URL = '/accounts/login/'
+USER_LOGOUT_URL = '/accounts/logout/'
+USER_PROFILE_URL = '/accounts/profile/'
+USER_ADMIN_LIST = '/accounts/all/'
