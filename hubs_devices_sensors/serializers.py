@@ -9,10 +9,12 @@ Classes:
 from rest_framework.serializers import (
     ModelSerializer,
     HyperlinkedModelSerializer,
-    HyperlinkedIdentityField
+    HyperlinkedIdentityField,
+    ValidationError
 )
 from index_app.serializers import UserBaseSerializer
 from .models import Sensor, Device, Hub, SensorCollectedData
+import hubs_devices_sensors.sensor_consts as CONSTS
 
 
 class SensorCollectedDataModelSerializer(ModelSerializer):
@@ -25,6 +27,32 @@ class SensorCollectedDataModelSerializer(ModelSerializer):
         'date_time_collected',
         'sensor_data_value',
     """
+
+    def validate(self, data):
+        if data['sensor'].sensor_data_type == CONSTS.PH_SENSOR:
+            if data['sensor_data_value']:
+                if data['sensor_data_value'] > CONSTS.PH_SENSOR_MAX_VALUE :
+                    raise ValidationError('pH Value cannot be more than 14')
+                elif data['sensor_data_value'] < CONSTS.PH_SENSOR_MIN_VALIE:
+                    raise ValidationError('pH Value cannot be less than 0')
+
+        elif data['sensor'].sensor_data_type == CONSTS.CO2_SENSOR:
+            if data['sensor_data_value']:
+                if data['sensor_data_value'] > CONSTS.CO2_SENSOR_MAX_VALUE:
+                    raise ValidationError('CO2 Value cannot be more than 100')
+                elif data['sensor_data_value'] < CONSTS.CO2_SENSOR_MIN_VALUE:
+                    raise ValidationError('CO2 Value cannot be less than 0')
+
+        elif data['sensor'].sensor_data_type == CONSTS.TEMPERATURE_SENSOR:
+            if data['sensor_data_value']:
+                if data['sensor_data_value'] > CONSTS.TEMPERATURE_SENSOR_MAX_VALUE:
+                    raise ValidationError('Temperature Value cannot be more than 127')
+                elif data['sensor_data_value'] < CONSTS.TEMPERATURE_SENSOR_MIN_VALUE:
+                    raise ValidationError('Temperature Value cannot be less than -40')
+
+        else:
+            raise ValidationError('No sensor data type was given')
+        return data
 
     class Meta:
         model = SensorCollectedData

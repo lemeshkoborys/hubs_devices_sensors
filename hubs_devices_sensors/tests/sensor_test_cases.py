@@ -682,3 +682,58 @@ class SensorCanCollectDataAPITestCase(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_sensor_collect_data_bad_ph_value(self):
+        sensor_data_to_collect = [
+            {
+                'sensor': self.sensor.sensor_serial_number,
+                'sensor_data_value': -4,
+                'date_time_collected': datetime.datetime.now()
+            },
+            {
+                'sensor': self.sensor.sensor_serial_number,
+                'sensor_data_value': 25,
+                'date_time_collected': datetime.datetime.now()
+            }
+        ]
+
+        sensor_data = SensorCollectedDataModelSerializer(data=sensor_data_to_collect, many=True)
+        self.assertFalse(sensor_data.is_valid())
+
+    def test_sensor_collect_data_bad_co2_value(self):
+        self.sensor.sensor_data_type = 'CO2'
+        self.sensor.save()
+        sensor_data_to_collect = [
+            {
+                'sensor': self.sensor.sensor_serial_number,
+                'sensor_data_value': -4,
+                'date_time_collected': datetime.datetime.now()
+            },
+            {
+                'sensor': self.sensor.sensor_serial_number,
+                'sensor_data_value': 320,
+                'date_time_collected': datetime.datetime.now()
+            }
+        ]
+
+        sensor_data = SensorCollectedDataModelSerializer(data=sensor_data_to_collect, many=True)
+        self.assertFalse(sensor_data.is_valid())
+
+    def test_sensor_collect_data_bad_temperature_value(self):
+        self.sensor.sensor_data_type = 'Temperature'
+        self.sensor.save()
+        sensor_data_to_collect = [
+            {
+                'sensor': self.sensor.sensor_serial_number,
+                'sensor_data_value': -234,
+                'date_time_collected': datetime.datetime.now()
+            },
+            {
+                'sensor': self.sensor.sensor_serial_number,
+                'sensor_data_value': 320,
+                'date_time_collected': datetime.datetime.now()
+            }
+        ]
+
+        sensor_data = SensorCollectedDataModelSerializer(data=sensor_data_to_collect, many=True)
+        self.assertFalse(sensor_data.is_valid())

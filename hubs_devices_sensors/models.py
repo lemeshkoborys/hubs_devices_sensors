@@ -49,27 +49,24 @@ class SensorCollectedData(models.Model):
     def clean(self, *args, **kwargs):
         if self.sensor.sensor_data_type == sensor_consts.PH_SENSOR:
             if self.sensor_data_value:
-                if self.sensor_data_value > sensor_consts.PH_SENSOR_MAX_VALUE \
-                and self.sensor_data_value:
+                if self.sensor_data_value > sensor_consts.PH_SENSOR_MAX_VALUE and self.sensor_data_value:
                     raise ValidationError('pH Value cannot be more than 14')
                 elif self.sensor_data_value < sensor_consts.PH_SENSOR_MIN_VALIE:
                     raise ValidationError('pH Value cannot be less than 0')
 
-        elif self.sensor.sensor_data_type == sensor_consts.CO2_SENSOR \
-            and self.sensor_data_value:
+        elif self.sensor.sensor_data_type == sensor_consts.CO2_SENSOR and self.sensor_data_value:
             if self.sensor_data_value:
                 if self.sensor_data_value > sensor_consts.CO2_SENSOR_MAX_VALUE:
                     raise ValidationError('CO2 Value cannot be more than 100')
                 elif self.sensor_data_value < sensor_consts.CO2_SENSOR_MIN_VALUE:
                     raise ValidationError('CO2 Value cannot be less than 0')
 
-        elif self.sensor.sensor_data_type == sensor_consts.TEMPERATURE_SENSOR \
-            and self.sensor_data_value:
+        elif self.sensor.sensor_data_type == sensor_consts.TEMPERATURE_SENSOR and self.sensor_data_value:
             if self.sensor_data_value:
                 if self.sensor_data_value > sensor_consts.TEMPERATURE_SENSOR_MAX_VALUE:
-                    raise ValidationError('CO2 Value cannot be more than 127')
+                    raise ValidationError('Temperature Value cannot be more than 127')
                 elif self.sensor_data_value < sensor_consts.TEMPERATURE_SENSOR_MIN_VALUE:
-                    raise ValidationError('CO2 Value cannot be less than -40')
+                    raise ValidationError('Temperature Value cannot be less than -40')
 
         else:
             raise ValidationError('No sensor data type was given')
@@ -141,7 +138,6 @@ class Sensor(models.Model):
         + self.sensor_title \
         + ' of Device: ' \
         + str(self.sensor_device.device_title)
-
 
 
 class Device(models.Model):
