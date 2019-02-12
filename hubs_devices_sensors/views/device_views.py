@@ -1,9 +1,7 @@
-from rest_framework import generics, status, exceptions
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from rest_framework import generics, exceptions
+from rest_framework.permissions import IsAuthenticated
 import hubs_devices_sensors.serializers as serializers
-from hubs_devices_sensors.models import Sensor, Device, Hub, SensorCollectedData
+from hubs_devices_sensors.models import Sensor, Device, SensorCollectedData
 
 
 class DeviceListAPIView(generics.ListAPIView):

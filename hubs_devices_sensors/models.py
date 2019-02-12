@@ -22,11 +22,6 @@ class SensorCollectedData(models.Model):
     @method save() - saves object after parforming clean() method
     """
 
-    class Meta:
-        db_table = 'sensor_collected_data'
-        verbose_name = 'Sensor Collected Data'
-        verbose_name_plural = 'Sensor Collected Data'
-
     date_time_collected = models.DateTimeField(
         unique=True,
         verbose_name='Date & Time Collected'
@@ -45,6 +40,11 @@ class SensorCollectedData(models.Model):
         default=0.1,
         verbose_name='Sensor Data Value'
     )
+
+    class Meta:
+        db_table = 'sensor_collected_data'
+        verbose_name = 'Sensor Collected Data'
+        verbose_name_plural = 'Sensor Collected Data'
 
     def clean(self, *args, **kwargs):
         if self.sensor.sensor_data_type == sensor_consts.PH_SENSOR:
@@ -101,13 +101,6 @@ class Sensor(models.Model):
         (sensor_consts.TEMPERATURE_SENSOR, 'Temperature'),
     )
 
-    class Meta:
-        db_table = 'sensors'
-        unique_together = (
-            'sensor_device',
-            'sensor_data_type'
-        )
-
     sensor_title = models.CharField(
         max_length=120,
         verbose_name='Sensor Title'
@@ -133,6 +126,13 @@ class Sensor(models.Model):
         verbose_name='Sensor Data Type'
     )
 
+    class Meta:
+        db_table = 'sensors'
+        unique_together = (
+            'sensor_device',
+            'sensor_data_type'
+        )
+
     def __str__(self):
         return 'Sensor: ' \
         + self.sensor_title \
@@ -153,9 +153,6 @@ class Device(models.Model):
 
     @method __str__(self) - string method. Returns Device title
     """
-
-    class Meta:
-        db_table = 'devices'
 
     sensors_data_fetch_time = models.DurationField(
         verbose_name='Sensors Data Fetch Time',
@@ -181,6 +178,9 @@ class Device(models.Model):
         verbose_name='Device Serial Number'
     )
 
+    class Meta:
+        db_table = 'devices'
+
     def __str__(self):
         return self.device_title
 
@@ -196,9 +196,6 @@ class Hub(models.Model):
 
     @method __str__(self) - string method. Returns Hub title
     """
-
-    class Meta:
-        db_table = 'hubs'
 
     devices_data_fetch_time = models.DurationField(
         verbose_name='Devices Data Fetch Time',
@@ -226,6 +223,9 @@ class Hub(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Hub Owner'
     )
+
+    class Meta:
+        db_table = 'hubs'
 
     def __str__(self):
         return self.hub_title

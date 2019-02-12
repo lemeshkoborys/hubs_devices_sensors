@@ -1,6 +1,6 @@
 from rest_framework import generics, exceptions
-from hubs_devices_sensors.models import Sensor, Device
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from hubs_devices_sensors.models import Sensor
+from rest_framework.permissions import IsAuthenticated
 import hubs_devices_sensors.serializers as serializers
 
 
