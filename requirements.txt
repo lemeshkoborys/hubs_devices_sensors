@@ -9,7 +9,7 @@ Django==2.1.5
 django-cors-headers==2.4.0
 django-rest-registration==0.3.14
 django-rest-swagger==2.2.0
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 djongo==1.2.31
 idna==2.8
 isort==4.3.4
